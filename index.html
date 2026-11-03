@@ -629,6 +629,8 @@ async function makeImage(sz, withText){
   return blob ? {blob, w:d.pxW, h:d.pxH} : null;
 }
 let saving = false;
+// Phones and tablets save through the share sheet (that is how an image reaches Photos); computers download the file.
+const mobileShare = () => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 async function saveSize(sz, btn){
   if(!cur || !lastGeo || saving) return;
   const t = T[lang], msg = $("saveMsg"), go = $("saveGo"), d = sizeOf(sz);
@@ -639,7 +641,7 @@ async function saveSize(sz, btn){
   if(!out){ msg.className = "msg err"; msg.textContent = t.dlFail; return; }
   const fname = `vicarus-${slug(nameOf(cur))||"view"}-${out.w}x${out.h}.jpg`;
   const file = new File([out.blob], fname, {type:"image/jpeg"});
-  if(navigator.canShare && navigator.canShare({files:[file]})){
+  if(mobileShare() && navigator.canShare && navigator.canShare({files:[file]})){
     const share = async () => {
       try{ await navigator.share({files:[file], title:nameOf(cur)}); go.hidden = true; msg.textContent = t.readyFor(out.w, out.h); }
       catch(e){ if(e && e.name==="NotAllowedError"){ msg.textContent = t.readyFor(out.w, out.h); go.textContent = t.saveBtn; go.onclick = share; go.hidden = false; } }
