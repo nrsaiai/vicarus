@@ -103,6 +103,17 @@ button{font:inherit;color:inherit}
 #zoom button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
 #zoom button[aria-pressed="true"] b{color:var(--ink)}
 
+/* Theme chips: the place categories, always on screen */
+#themes{position:fixed;top:calc(70px + env(safe-area-inset-top,0px));left:max(28px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:opacity .4s;padding:2px 0}
+#themes::-webkit-scrollbar{display:none}
+.tchip{flex:none;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  color:var(--paper);border-radius:999px;padding:7px 12px;font:500 12px/1 var(--body);cursor:pointer;display:flex;gap:6px;align-items:baseline;white-space:nowrap}
+.tchip small{font:400 10px/1 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.tchip:hover{border-color:rgba(242,244,239,.4)}
+.tchip[aria-pressed="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.tchip[aria-pressed="true"] small{color:var(--ink);opacity:.65}
+
 /* Brand */
 #brand{position:fixed;top:calc(22px + env(safe-area-inset-top,0px));left:max(28px,env(safe-area-inset-left,0px));
   font:600 13px var(--body);letter-spacing:.02em;display:flex;align-items:baseline;gap:10px;transition:opacity .4s}
@@ -125,7 +136,7 @@ button{font:inherit;color:inherit}
 #attrib{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(6px + env(safe-area-inset-bottom,0px));
   font:400 10px var(--body);color:rgba(242,244,239,.6);pointer-events:none}
 
-body.clean #caption,body.clean #rail,body.clean #brand,body.clean #dock,body.clean #scrim,body.clean #topscrim,body.clean .edge{opacity:0;pointer-events:none}
+body.clean #caption,body.clean #themes,body.clean #rail,body.clean #brand,body.clean #dock,body.clean #scrim,body.clean #topscrim,body.clean .edge{opacity:0;pointer-events:none}
 body.clean #unhide{display:grid}
 #unhide{display:none;position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));
   background:var(--glass);border:1px solid var(--line);border-radius:12px;opacity:.35}
@@ -153,6 +164,21 @@ body.clean #unhide{display:grid}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .note{font-size:13px;color:var(--muted);line-height:1.55;margin:auto 0 0}
 
+/* Save sizes */
+.sizes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:auto;min-height:0;padding:2px}
+.size{display:flex;align-items:center;gap:12px;text-align:left;border:1px solid var(--line);background:transparent;border-radius:12px;padding:10px;cursor:pointer;color:var(--paper);min-width:0}
+.size:hover,.size:focus-visible{border-color:var(--lotus)}
+.size[aria-busy="true"]{border-color:var(--lotus);background:rgba(233,166,180,.08)}
+.size .frame{flex:none;width:40px;height:40px;display:grid;place-items:center}
+.size .frame i{display:block;border:1.5px solid var(--jade);border-radius:3px;background:rgba(127,200,169,.12)}
+.size span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.size strong{font:500 13px/1.25 var(--body)}
+.size small{font:400 11px/1.2 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.toggle{display:flex;align-items:center;gap:10px;margin:16px 0 4px;font:500 14px var(--body);cursor:pointer}
+.toggle input{width:20px;height:20px;accent-color:var(--lotus);margin:0}
+.savebar{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:12px}
+.savebar .go{height:46px}
+
 /* Search */
 .sform{display:flex;gap:8px}
 .sform input{flex:1;min-width:0;font:400 16px var(--body);color:var(--paper);background:var(--field);border:1px solid var(--line);
@@ -179,7 +205,7 @@ body.clean #unhide{display:grid}
 .toast.on{opacity:1}
 .toast.act{pointer-events:auto}
 .toast button{border:0;background:var(--ink);color:var(--paper);border-radius:999px;padding:6px 12px;font:600 13px var(--body);cursor:pointer;white-space:nowrap}
-#offline{position:fixed;left:max(18px,env(safe-area-inset-left,0px));top:calc(72px + env(safe-area-inset-top,0px));white-space:nowrap;
+#offline{position:fixed;left:max(18px,env(safe-area-inset-left,0px));top:calc(112px + env(safe-area-inset-top,0px));white-space:nowrap;
   font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--paper);background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
 
 @media (max-width:640px){
@@ -190,6 +216,7 @@ body.clean #unhide{display:grid}
   #rail{left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));justify-content:space-between;padding:3px}
   .sep{display:none}
   #rail .ic{width:34px;height:34px}
+  #themes{top:calc(64px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));right:0;padding-right:16px}
   #zoom button{width:46px;height:32px}
   #name{font-size:28px}
   #caption{max-width:100%;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:160px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
@@ -220,6 +247,7 @@ body.clean #unhide{display:grid}
   <button class="ic" id="filtBtn" data-tip="opts"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
   <button class="ic" id="hideBtn" data-tip="hide"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><path d="M4 4l16 16"/></svg></button>
 </nav>
+<div id="themes" role="toolbar"></div>
 <button class="ic" id="unhide" aria-label="Show"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg></button>
 
 
@@ -256,6 +284,16 @@ body.clean #unhide{display:grid}
   </div>
 </div>
 
+<div class="panel" id="savePanel" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="saveTitle">
+    <header><h2 id="saveTitle" data-t="saveTitle"></h2><button class="ic" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <p class="hint" data-t="saveHint"></p>
+    <div class="sizes" id="sizes"></div>
+    <label class="toggle" for="withText"><input type="checkbox" id="withText"><span data-t="withText"></span></label>
+    <div class="savebar"><p class="msg" id="saveMsg" aria-live="polite"></p><button class="go" id="saveGo" type="button" hidden></button></div>
+  </div>
+</div>
+
 <div class="panel" id="galPanel" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="galTitle">
     <header><h2 id="galTitle" data-t="gal"></h2><button class="ic" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
@@ -269,7 +307,6 @@ body.clean #unhide{display:grid}
     <header><h2 id="filtTitle" data-t="opts"></h2><button class="ic" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
     <div class="group"><h3 data-t="language"></h3><div class="chips" id="langChips"></div></div>
     <div class="group"><h3 data-t="region"></h3><div class="chips" id="regionChips"></div></div>
-    <div class="group"><h3 data-t="theme"></h3><div class="chips" id="themeChips"></div></div>
     <p class="note" id="filtNote"></p>
   </div>
 </div>
@@ -290,13 +327,17 @@ const T = {
       gal:"Bộ sưu tập",opts:"Tùy chọn",hide:"Ẩn chữ (H)",search:"Tìm địa điểm",region:"Vùng",theme:"Chủ đề",language:"Ngôn ngữ",
       favs:"Yêu thích",all:"Tất cả",any:"Tất cả",
       R:{N:"Miền Bắc",C:"Miền Trung",S:"Miền Nam"},
+      THS:{mtn:"Núi & ruộng",sea:"Biển & đảo",water:"Sông nước",city:"Đô thị & di sản",karst:"Núi đá & hang"},
       TH:{mtn:"Núi & ruộng bậc thang",sea:"Biển & đảo",water:"Sông, hồ & châu thổ",city:"Đô thị & di sản",karst:"Núi đá vôi & hang động"},
       span:"khung rộng ≈",km:"km",zoom:n=>`Mức zoom ${n}`,
       empty:"Chưa có địa điểm yêu thích. Bấm ♡ khi gặp một khung cảnh bạn thích.",
       note:n=>`${n} địa điểm khớp bộ lọc. Mỗi lần mở app sẽ chọn ngẫu nhiên một địa điểm.`,
       saved:"Đã lưu hình nền",added:"Đã thêm vào yêu thích",removed:"Đã bỏ khỏi yêu thích",
       dlFail:"Không lưu được: máy chủ ảnh chặn xuất hình. Hãy chụp màn hình thay thế.",loading:"Đang tải ảnh vệ tinh",
-      ready:"Ảnh đã sẵn sàng",saveBtn:"Lưu ảnh",offline:"Ngoại tuyến · nơi đã xem",
+      ready:"Ảnh đã sẵn sàng",saveBtn:"Lưu ảnh",
+      saveTitle:"Lưu hình nền",saveHint:"Chọn kích thước. Ảnh giữ đúng khung cảnh và thiết kế của Vicarus.",withText:"Kèm tên và bản đồ",
+      making:(w,h)=>`Đang tạo ảnh ${w} × ${h}…`,readyFor:(w,h)=>`Ảnh ${w} × ${h} đã sẵn sàng.`,savedFor:(w,h)=>`Đã lưu ảnh ${w} × ${h}.`,
+      SZ:{screen:"Màn hình này",phone:"Điện thoại",tablet:"Máy tính bảng",desk:"Máy tính 4K",laptop:"Laptop",sq:"Instagram vuông",port:"Instagram dọc",story:"Story / Reels"},offline:"Ngoại tuyến · nơi đã xem",
       searchGo:"Tìm",searchPh:"Tên địa điểm hoặc link Google Maps",
       searchHint:"Gõ tên một nơi ở Việt Nam rồi nhấn Tìm. Bạn cũng có thể dán link Google Maps hoặc tọa độ, ví dụ 21.0285, 105.8542.",
       inList:"Có sẵn trong Vicarus",onMap:"Từ bản đồ",searching:"Đang tìm…",
@@ -309,13 +350,17 @@ const T = {
       gal:"Gallery",opts:"Options",hide:"Hide labels (H)",search:"Find a place",region:"Region",theme:"Theme",language:"Language",
       favs:"Favorites",all:"All places",any:"All",
       R:{N:"North",C:"Central",S:"South"},
+      THS:{mtn:"Mountains",sea:"Coast & islands",water:"Rivers & delta",city:"Cities & heritage",karst:"Karst & caves"},
       TH:{mtn:"Mountains & terraces",sea:"Coast & islands",water:"Rivers, lakes & delta",city:"Cities & heritage",karst:"Karst & caves"},
       span:"frame ≈",km:"km wide",zoom:n=>`Zoom level ${n}`,
       empty:"No favorites yet. Tap ♡ when you find a view you like.",
       note:n=>`${n} places match. Each time you open the app, one is picked at random.`,
       saved:"Wallpaper saved",added:"Added to favorites",removed:"Removed from favorites",
       dlFail:"Couldn't save: the imagery server blocked the export. Take a screenshot instead.",loading:"Loading satellite imagery",
-      ready:"Image ready",saveBtn:"Save image",offline:"Offline · seen places",
+      ready:"Image ready",saveBtn:"Save image",
+      saveTitle:"Save wallpaper",saveHint:"Pick a size. The image keeps this view and the Vicarus design.",withText:"Include name and map",
+      making:(w,h)=>`Making ${w} × ${h} image…`,readyFor:(w,h)=>`${w} × ${h} image is ready.`,savedFor:(w,h)=>`Saved ${w} × ${h} image.`,
+      SZ:{screen:"This screen",phone:"Phone",tablet:"Tablet",desk:"Desktop 4K",laptop:"Laptop",sq:"Instagram square",port:"Instagram portrait",story:"Story / Reels"},offline:"Offline · seen places",
       searchGo:"Search",searchPh:"Place name or Google Maps link",
       searchHint:"Type the name of a place in Vietnam and tap Search. You can also paste a Google Maps link or coordinates such as 21.0285, 105.8542.",
       inList:"Already in Vicarus",onMap:"From the map",searching:"Searching…",
@@ -506,7 +551,7 @@ function next(){ if(hpos < hist.length-1){ hpos++; show(hist[hpos], false); } el
 function prev(){ if(hpos > 0){ hpos--; show(hist[hpos], false); } }
 
 // ── Dot-map inset
-const B = {w:102.0,e:115.0,s:8.2,n:23.5};
+const B = {w:102.0,e:115.0,s:7.6,n:23.5};
 function drawMap(c, x0, y0, w, h, p){
   const pad = 6, W = w-pad*2, H = h-pad*2-12;
   const X0=mx(B.w),X1=mx(B.e),Y0=my(B.n),Y1=my(B.s);
@@ -537,32 +582,73 @@ function toggleFav(){
   store.set("favs",[...favs]); $("favBtn").setAttribute("aria-pressed", favs.has(cur.id));
 }
 
-// ── Wallpaper: render at the exact pixel size of this screen (1179 × 2556 on iPhone 15), same centre and scale as the view.
-async function download(){
-  if(!cur || !lastGeo) return;
-  const {W,H} = lastGeo;
-  const scale = clamp(devicePixelRatio||1, 1, 3);
-  const s = screenCss(W,H);
-  const g = geometry(cur, s.W, s.H, lastGeo.g.zEff, scale);
-  const cv = document.createElement("canvas"); cv.width = Math.round(s.W*scale); cv.height = Math.round(s.H*scale);
-  const c = cv.getContext("2d"); c.scale(scale,scale); c.fillStyle="#0b1412"; c.fillRect(0,0,s.W,s.H);
+// ── Wallpapers in several sizes. Each size is laid out like the app at a matching screen width (vw), then scaled up.
+const SIZES = [
+  {id:"screen"},
+  {id:"phone",  w:1290, h:2796, vw:393,  r:"9:19.5"},
+  {id:"story",  w:1080, h:1920, vw:393,  r:"9:16"},
+  {id:"port",   w:1080, h:1350, vw:540,  r:"4:5"},
+  {id:"sq",     w:1080, h:1080, vw:540,  r:"1:1"},
+  {id:"tablet", w:2048, h:2732, vw:820,  r:"3:4"},
+  {id:"laptop", w:2880, h:1800, vw:1440, r:"16:10"},
+  {id:"desk",   w:3840, h:2160, vw:1440, r:"16:9"},
+];
+function sizeOf(sz){
+  if(sz.id!=="screen") return {pxW:sz.w, pxH:sz.h, vW:sz.vw, vH:sz.vw*sz.h/sz.w, scale:sz.w/sz.vw};
+  const s = screenCss(lastGeo.W, lastGeo.H), scale = clamp(devicePixelRatio||1, 1, 3);
+  return {pxW:Math.round(s.W*scale), pxH:Math.round(s.H*scale), vW:s.W, vH:s.H, scale, screen:true};
+}
+function renderSizes(){
+  const t = T[lang], box = $("sizes"); box.innerHTML = "";
+  for(const sz of SIZES){
+    const d = lastGeo ? sizeOf(sz) : {pxW:0,pxH:0};
+    const k = 34/Math.max(d.pxW||1, d.pxH||1);
+    const b = document.createElement("button"); b.className="size"; b.type="button"; b.dataset.id = sz.id;
+    b.innerHTML = `<span class="frame"><i style="width:${Math.max(8,Math.round(d.pxW*k))}px;height:${Math.max(8,Math.round(d.pxH*k))}px"></i></span><span><strong></strong><small></small></span>`;
+    b.querySelector("strong").textContent = t.SZ[sz.id];
+    b.querySelector("small").textContent = `${d.pxW} × ${d.pxH}${sz.r ? " · "+sz.r : ""}`;
+    b.onclick = () => saveSize(sz, b);
+    box.appendChild(b);
+  }
+  $("withText").checked = store.get("withText", true);
+}
+$("withText").addEventListener("change", e => store.set("withText", e.target.checked));
+
+async function makeImage(sz, withText){
+  const d = sizeOf(sz);
+  const zEff = d.screen ? lastGeo.g.zEff : zFor(cur, d.vW, d.vH, level);
+  const g = geometry(cur, d.vW, d.vH, zEff, d.scale);
+  const cv = document.createElement("canvas"); cv.width = d.pxW; cv.height = d.pxH;
+  const c = cv.getContext("2d"); c.scale(d.scale, d.scale); c.fillStyle="#0b1412"; c.fillRect(0,0,d.vW,d.vH);
   const load = t => new Promise(res=>{ const i=new Image(); i.crossOrigin="anonymous"; i.onload=()=>res(i); i.onerror=()=>res(null); i.src=TILE(t.z,t.y,t.x); });
   const imgs = await Promise.all(g.tiles.map(load));
   imgs.forEach((im,k)=>{ if(im){ const t=g.tiles[k]; c.drawImage(im, t.l, t.t, g.ts+0.5, g.ts+0.5); }});
-  await drawOverlay(c, s, scale);
+  if(withText){ if(d.screen) await drawOverlay(c, {W:d.vW, H:d.vH}, d.scale); else await drawOverlayAt(c, d.vW, d.vH, d.scale); }
   let blob = null;
-  try{ blob = await new Promise(r=>cv.toBlob(r,"image/png")); }catch(e){}
-  if(!blob){ toast(T[lang].dlFail); return; }
-  const fname = `vicarus-${slug(nameOf(cur))||"view"}.png`;
-  const file = new File([blob], fname, {type:"image/png"});
-  const share = async () => {
-    try{ await navigator.share({files:[file], title:nameOf(cur)}); }
-    catch(e){ if(e && e.name==="NotAllowedError") toast(T[lang].ready, share, T[lang].saveBtn); }
-  };
-  if(navigator.canShare && navigator.canShare({files:[file]})){ await share(); return; }
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fname;
+  try{ blob = await new Promise(r=>cv.toBlob(r, "image/jpeg", 0.92)); }catch(e){}
+  return blob ? {blob, w:d.pxW, h:d.pxH} : null;
+}
+let saving = false;
+async function saveSize(sz, btn){
+  if(!cur || !lastGeo || saving) return;
+  const t = T[lang], msg = $("saveMsg"), go = $("saveGo"), d = sizeOf(sz);
+  saving = true; go.hidden = true; msg.className = "msg"; msg.textContent = t.making(d.pxW, d.pxH); btn.setAttribute("aria-busy","true");
+  let out = null;
+  try{ out = await makeImage(sz, $("withText").checked); }catch(e){}
+  saving = false; btn.removeAttribute("aria-busy");
+  if(!out){ msg.className = "msg err"; msg.textContent = t.dlFail; return; }
+  const fname = `vicarus-${slug(nameOf(cur))||"view"}-${out.w}x${out.h}.jpg`;
+  const file = new File([out.blob], fname, {type:"image/jpeg"});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    const share = async () => {
+      try{ await navigator.share({files:[file], title:nameOf(cur)}); go.hidden = true; msg.textContent = t.readyFor(out.w, out.h); }
+      catch(e){ if(e && e.name==="NotAllowedError"){ msg.textContent = t.readyFor(out.w, out.h); go.textContent = t.saveBtn; go.onclick = share; go.hidden = false; } }
+    };
+    await share(); return;
+  }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(out.blob); a.download=fname;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-  toast(T[lang].saved);
+  msg.textContent = t.savedFor(out.w, out.h);
 }
 
 // Copy the on-screen caption and dot-map onto the wallpaper, glyph by glyph at their exact screen positions.
@@ -571,10 +657,11 @@ const graphemes = str => (window.Intl && Intl.Segmenter)
   : (()=>{ const out=[]; let i=0; for(const ch of str){ out.push({g:ch,i}); i+=ch.length; } return out; })();
 function drawText(c, el, dx, dy, scale){
   if(!el || !el.textContent.trim() || !el.getClientRects().length) return;
-  const range = document.createRange();
-  const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let node;
+  const doc = el.ownerDocument, win = doc.defaultView;
+  const range = doc.createRange();
+  const walk = doc.createTreeWalker(el, 4 /* text */); let node;
   while((node = walk.nextNode())){
-    const cs = getComputedStyle(node.parentElement);
+    const cs = win.getComputedStyle(node.parentElement);
     c.save();
     c.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
     c.fillStyle = cs.color; c.textAlign = "left"; c.textBaseline = "alphabetic";
@@ -596,14 +683,40 @@ async function drawOverlay(c, s, scale){
   try{ await document.fonts.ready; }catch(e){}
   const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
   const dxR = s.W - vw, dyB = s.H - vh;          // keep bottom/right-anchored parts anchored on the full screen
-  const sr = $("scrim").getBoundingClientRect(), top = s.H - sr.height;
-  const gr = c.createLinearGradient(0, s.H, 0, top);
-  gr.addColorStop(0,"rgba(5,10,9,.82)"); gr.addColorStop(.45,"rgba(5,10,9,.35)"); gr.addColorStop(1,"rgba(5,10,9,0)");
-  c.fillStyle = gr; c.fillRect(0, top, s.W, sr.height);
+  paintScrim(c, s.W, s.H, $("scrim").getBoundingClientRect().height);
   const ir = $("insetCv").getBoundingClientRect();
   if(ir.width) drawMap(c, ir.left+dxR, ir.top+dyB, ir.width, ir.height, cur);
   for(const id of ["region","dot","province","name","alt","coord"]) drawText(c, $(id), 0, dyB, scale);
   drawText(c, $("insetLabel"), dxR, dyB, scale);
+}
+function paintScrim(c, W, H, h){
+  const gr = c.createLinearGradient(0, H, 0, H-h);
+  gr.addColorStop(0,"rgba(5,10,9,.82)"); gr.addColorStop(.45,"rgba(5,10,9,.35)"); gr.addColorStop(1,"rgba(5,10,9,0)");
+  c.fillStyle = gr; c.fillRect(0, H-h, W, h);
+}
+// Other sizes: lay the caption out in a hidden frame of that width so the app's own styles decide wrapping and placement.
+async function drawOverlayAt(c, vW, vH, scale){
+  const f = document.createElement("iframe");
+  f.setAttribute("aria-hidden","true"); f.tabIndex = -1;
+  f.style.cssText = `position:fixed;left:-30000px;top:0;width:${Math.round(vW)}px;height:${Math.round(vH)}px;border:0;visibility:hidden;pointer-events:none`;
+  const css = [...document.querySelectorAll("style")].map(x=>x.textContent).join("\n");
+  const fonts = [...document.querySelectorAll('link[rel="stylesheet"]')].map(x=>x.outerHTML).join("");
+  f.srcdoc = `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fonts}<style>${css}</style></head>`+
+    `<body><div id="scrim"></div><section id="caption">${$("caption").innerHTML}</section>`+
+    `<div id="dock"><div id="inset"><canvas id="insetCv"></canvas><div id="insetLabel"></div></div></div></body></html>`;
+  const loaded = new Promise(r => f.onload = r);
+  document.body.appendChild(f);
+  try{
+    await loaded;
+    const d = f.contentDocument;
+    d.getElementById("insetLabel").textContent = $("insetLabel").textContent;
+    try{ await d.fonts.ready; }catch(e){}
+    await new Promise(r => setTimeout(r, 30));
+    paintScrim(c, vW, vH, d.getElementById("scrim").getBoundingClientRect().height);
+    const ir = d.getElementById("insetCv").getBoundingClientRect();
+    if(ir.width) drawMap(c, ir.left, ir.top, ir.width, ir.height, cur);
+    for(const id of ["region","dot","province","name","alt","coord","insetLabel"]) drawText(c, d.getElementById(id), 0, 0, scale);
+  } finally { f.remove(); }
 }
 
 // ── Gallery
@@ -630,6 +743,25 @@ function renderGallery(){
   }
 }
 
+// ── Theme chips
+function renderThemes(){
+  const t = T[lang], box = $("themes"); box.innerHTML = "";
+  const inReg = P.filter(p => filt.reg==="all" || p.reg===filt.reg);
+  for(const [v,label] of [["all",t.any], ...Object.entries(t.THS)]){
+    const n = v==="all" ? inReg.length : inReg.filter(p=>p.th===v).length;
+    const b = document.createElement("button"); b.className = "tchip"; b.type = "button";
+    b.setAttribute("aria-pressed", filt.th===v); b.title = v==="all" ? t.any : t.TH[v];
+    b.innerHTML = `<span></span><small>${n}</small>`; b.querySelector("span").textContent = label;
+    b.onclick = () => {
+      if(filt.th===v){ if(v!=="all") show(randomPlace()); return; }
+      filt.th = v; store.set("filt", filt); renderThemes();
+      if(v!=="all" || (cur && cur.custom)) show(randomPlace()); else if(cur && lastGeo) caption(cur, lastGeo.g);
+    };
+    box.appendChild(b);
+  }
+  const on = box.querySelector('[aria-pressed="true"]'); if(on && on.scrollIntoView) on.scrollIntoView({inline:"nearest", block:"nearest"});
+}
+
 // ── Options: language and filters
 function renderFilters(){
   const t=T[lang];
@@ -642,8 +774,7 @@ function renderFilters(){
     }
   };
   mk($("langChips"), lang, [["vi","Tiếng Việt"],["en","English"]], v=>{ lang=v; store.set("lang",lang); applyLang(); });
-  mk($("regionChips"), filt.reg, [["all",t.any],...Object.entries(t.R)], v=>{ filt.reg=v; store.set("filt",filt); });
-  mk($("themeChips"), filt.th, [["all",t.any],...Object.entries(t.TH)], v=>{ filt.th=v; store.set("filt",filt); });
+  mk($("regionChips"), filt.reg, [["all",t.any],...Object.entries(t.R)], v=>{ filt.reg=v; store.set("filt",filt); renderThemes(); });
   $("filtNote").textContent = t.note(pool().length);
 }
 
@@ -757,15 +888,17 @@ $("searchForm").addEventListener("submit", e => { e.preventDefault(); $("q").blu
 $("q").addEventListener("input", e => { const v=e.target.value; if(!parseLink(v)) renderLocal(v); });
 
 // ── Panels
+const PANELS = ["galPanel","filtPanel","searchPanel","savePanel"];
 function openPanel(id){
   closePanels(true); $(id).hidden=false;
   if(id==="galPanel") renderGallery();
   else if(id==="filtPanel") renderFilters();
+  else if(id==="savePanel"){ $("saveMsg").textContent=""; $("saveMsg").className="msg"; $("saveGo").hidden=true; renderSizes(); }
   else { $("q").value=""; $("results").innerHTML=""; setTimeout(()=>$("q").focus(), 50); }
 }
 function closePanels(silent){
   const wasFilt = !$("filtPanel").hidden;
-  ["galPanel","filtPanel","searchPanel"].forEach(id=>$(id).hidden=true);
+  PANELS.forEach(id=>$(id).hidden=true);
   if(silent!==true && wasFilt && cur && !cur.custom){ const list=pool(); if(list.length && !list.includes(cur)) show(randomPlace()); else if(lastGeo) caption(cur, lastGeo.g); }
 }
 
@@ -777,7 +910,7 @@ function applyLang(){
   $("zoom").setAttribute("aria-label", t.zoom("").trim());
   $("q").placeholder = t.searchPh;
   $("loader").textContent = t.loading;
-  netBadge();
+  netBadge(); renderThemes();
   if(cur && lastGeo) caption(cur, lastGeo.g);
   if(!$("galPanel").hidden) renderGallery();
 }
@@ -786,7 +919,7 @@ function netBadge(){ const o=$("offline"); o.textContent=T[lang].offline; o.hidd
 // ── Wiring
 $("nextBtn").onclick=next; $("nextEdge").onclick=next;
 $("prevBtn").onclick=prev; $("prevEdge").onclick=prev;
-$("favBtn").onclick=toggleFav; $("dlBtn").onclick=download;
+$("favBtn").onclick=toggleFav; $("dlBtn").onclick=()=>openPanel("savePanel");
 $("searchBtn").onclick=()=>openPanel("searchPanel");
 $("galBtn").onclick=()=>openPanel("galPanel"); $("filtBtn").onclick=()=>openPanel("filtPanel");
 $("tabFav").onclick=()=>{galTab="fav";renderGallery()}; $("tabAll").onclick=()=>{galTab="all";renderGallery()};
@@ -797,14 +930,14 @@ document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>closePanels()
 document.querySelectorAll(".panel").forEach(p=>p.addEventListener("click",e=>{ if(e.target===p) closePanels(); }));
 addEventListener("keydown",e=>{
   if(e.metaKey||e.ctrlKey||e.altKey) return;
-  const panelOpen = ["galPanel","filtPanel","searchPanel"].some(id=>!$(id).hidden);
+  const panelOpen = PANELS.some(id=>!$(id).hidden);
   if(e.key==="Escape"){ if(panelOpen) closePanels(); else document.body.classList.remove("clean"); return; }
   if(panelOpen) return;
   const k=e.key.toLowerCase();
   if(k==="arrowright"||k===" "||k==="n"){ e.preventDefault(); next(); }
   else if(k==="arrowleft"||k==="p") prev();
   else if(k==="f") toggleFav();
-  else if(k==="d") download();
+  else if(k==="d") openPanel("savePanel");
   else if(k==="g") openPanel("galPanel");
   else if(k==="h") toggleClean();
   else if(k==="/"||k==="s"){ e.preventDefault(); openPanel("searchPanel"); }
@@ -837,7 +970,7 @@ stage.addEventListener("dblclick", cycleZoom);
 let hiddenAt = 0;
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden){ hiddenAt = Date.now(); return; }
-  if(hiddenAt && Date.now()-hiddenAt > 30*60*1000 && ["galPanel","filtPanel","searchPanel"].every(id=>$(id).hidden)) show(randomPlace());
+  if(hiddenAt && Date.now()-hiddenAt > 30*60*1000 && PANELS.every(id=>$(id).hidden)) show(randomPlace());
 });
 addEventListener("online", netBadge); addEventListener("offline", netBadge);
 if("serviceWorker" in navigator && window.isSecureContext){ addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
