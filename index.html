@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Vicarus</title>
 <meta name="description" content="Mỗi lần mở là một góc Việt Nam nhìn từ vệ tinh. A new aerial view of Vietnam every time you open it.">
 <meta name="theme-color" content="#0b1412">
@@ -29,14 +29,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Be+Vietnam+Pro:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap&subset=vietnamese">
 <style>
-/* Layout: full-bleed satellite frame; caption anchored bottom-left like a map legend,
-   tool rail top-right, a constellation inset of every place bottom-right. Single dark look over imagery. */
+/* Layout: full-bleed satellite frame sized to the physical screen; caption bottom-left like a map legend,
+   tool rail top, zoom ladder on the right edge, a dot-map of every place as the inset. Single dark look over imagery. */
 :root{
   --ink:#0b1412;          /* deep paddy-water black */
   --paper:#f2f4ef;        /* caption text */
   --muted:#b9c4bd;        /* secondary text */
   --lotus:#e9a6b4;        /* accent: sen hồng */
   --jade:#7fc8a9;         /* inset dots */
+  --field:#16241f;        /* inputs */
   --glass:rgba(11,20,18,.55);
   --line:rgba(242,244,239,.18);
   --display:"Fraunces", "Iowan Old Style", Georgia, serif;
@@ -45,22 +46,24 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;background:var(--ink);color:var(--paper);font-family:var(--body);overflow:hidden}
+html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);font-family:var(--body);overflow:hidden;
+  overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
 [hidden]{display:none!important}
 button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--lotus);outline-offset:2px}
 
-#stage{position:fixed;inset:0;overflow:hidden;background:var(--ink)}
-.layer{position:absolute;inset:0;opacity:0;transition:opacity 1.1s ease}
+/* The photo layer is sized in script to the real screen, so it also covers the strip iOS sometimes leaves at the bottom. */
+#stage{position:fixed;left:0;top:0;width:100vw;height:100vh;height:100lvh;overflow:hidden;background:var(--ink);touch-action:none}
+.layer{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;transition:opacity 1.1s ease}
 .layer.on{opacity:1}
-.layer img{position:absolute;display:block;user-select:none;-webkit-user-drag:none;max-width:none}
-#scrim{position:fixed;inset:auto 0 0 0;height:min(55vh,460px);pointer-events:none;
+.layer img{position:absolute;display:block;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;max-width:none}
+#scrim{position:fixed;left:0;right:0;bottom:0;height:min(55vh,460px);pointer-events:none;
   background:linear-gradient(to top,rgba(5,10,9,.82),rgba(5,10,9,.35) 45%,transparent)}
-#topscrim{position:fixed;inset:0 0 auto 0;height:120px;pointer-events:none;
-  background:linear-gradient(to bottom,rgba(5,10,9,.45),transparent)}
+#topscrim{position:fixed;inset:0 0 auto 0;height:calc(120px + env(safe-area-inset-top,0px));pointer-events:none;
+  background:linear-gradient(to bottom,rgba(5,10,9,.5),transparent)}
 
 #loader{position:fixed;left:50%;top:50%;translate:-50% -50%;font:500 12px var(--mono);letter-spacing:.14em;
-  text-transform:uppercase;color:var(--muted);opacity:0;transition:opacity .3s}
+  text-transform:uppercase;color:var(--muted);opacity:0;transition:opacity .3s;pointer-events:none}
 #loader.on{opacity:1}
 
 /* Caption */
@@ -68,10 +71,12 @@ button{font:inherit;color:inherit}
   padding:0 16px calc(28px + env(safe-area-inset-bottom,0px)) max(28px,env(safe-area-inset-left,0px));
   display:flex;flex-direction:column;gap:10px;transition:opacity .4s}
 .eyebrow{font:600 11px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--lotus);display:flex;gap:10px;flex-wrap:wrap}
-.eyebrow span+span::before{content:"·";margin-right:10px;color:var(--muted)}
+.eyebrow span:empty{display:none}
+.eyebrow span+span:not(:empty)::before{content:"·";margin-right:10px;color:var(--muted)}
 #name{font:600 clamp(30px,5.2vw,64px)/1.02 var(--display);font-variation-settings:"opsz" 144;margin:0;text-wrap:balance;
-  text-shadow:0 2px 24px rgba(0,0,0,.45)}
+  text-shadow:0 2px 24px rgba(0,0,0,.45);overflow-wrap:anywhere}
 #alt{font:400 clamp(15px,1.5vw,18px)/1.35 var(--body);color:var(--muted);margin:0}
+#alt:empty{display:none}
 .meta{display:flex;flex-wrap:wrap;gap:6px 18px;font:400 12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums;margin-top:4px}
 .meta b{font-weight:500;color:var(--paper)}
 
@@ -79,13 +84,23 @@ button{font:inherit;color:inherit}
 #rail{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));
   display:flex;gap:2px;padding:4px;border-radius:14px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   border:1px solid var(--line);transition:opacity .4s}
-.ic{width:40px;height:40px;display:grid;place-items:center;border:0;background:transparent;border-radius:10px;cursor:pointer;color:var(--paper)}
+.ic{width:40px;height:40px;display:grid;place-items:center;border:0;background:transparent;border-radius:10px;cursor:pointer;color:var(--paper);flex:none}
 .ic:hover{background:rgba(242,244,239,.12)}
 .ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .ic.fav[aria-pressed="true"]{color:var(--lotus)}
 .ic.fav[aria-pressed="true"] svg{fill:var(--lotus)}
-.sep{width:1px;margin:8px 3px;background:var(--line)}
-#langBtn{font:600 12px var(--mono);letter-spacing:.04em}
+.sep{width:1px;margin:8px 3px;background:var(--line);flex:none}
+
+/* Zoom ladder: three steps toward the place, labelled by how wide the frame is */
+#zoom{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(224px + env(safe-area-inset-bottom,0px));
+  display:flex;flex-direction:column;gap:2px;padding:4px;border-radius:14px;background:var(--glass);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);transition:opacity .4s}
+#zoom button{width:56px;height:40px;border:0;border-radius:10px;background:transparent;color:var(--muted);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font:400 10px/1 var(--mono);font-variant-numeric:tabular-nums}
+#zoom button b{font:600 13px/1 var(--mono);color:var(--paper)}
+#zoom button:hover{background:rgba(242,244,239,.12)}
+#zoom button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+#zoom button[aria-pressed="true"] b{color:var(--ink)}
 
 /* Brand */
 #brand{position:fixed;top:calc(22px + env(safe-area-inset-top,0px));left:max(28px,env(safe-area-inset-left,0px));
@@ -101,16 +116,16 @@ button{font:inherit;color:inherit}
 #prevEdge{left:max(8px,env(safe-area-inset-left,0px))}
 #nextEdge{right:max(8px,env(safe-area-inset-right,0px))}
 
-/* Constellation inset */
+/* Dot-map inset */
 #inset{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));
-  width:150px;height:170px;transition:opacity .4s}
+  width:150px;height:170px;transition:opacity .4s;pointer-events:none}
 #inset canvas{width:100%;height:100%;display:block}
 #insetLabel{position:absolute;left:0;bottom:-2px;font:400 10px var(--mono);color:var(--muted);letter-spacing:.06em}
 
 #attrib{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(6px + env(safe-area-inset-bottom,0px));
-  font:400 10px var(--body);color:rgba(242,244,239,.6)}
+  font:400 10px var(--body);color:rgba(242,244,239,.6);pointer-events:none}
 
-body.clean #caption,body.clean #rail,body.clean #brand,body.clean #inset,body.clean #scrim,body.clean #topscrim,body.clean .edge{opacity:0;pointer-events:none}
+body.clean #caption,body.clean #rail,body.clean #brand,body.clean #inset,body.clean #scrim,body.clean #topscrim,body.clean .edge,body.clean #zoom{opacity:0;pointer-events:none}
 body.clean #unhide{display:grid}
 #unhide{display:none;position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));
   background:var(--glass);border:1px solid var(--line);border-radius:12px;opacity:.35}
@@ -119,39 +134,64 @@ body.clean #unhide{display:grid}
 /* Panels */
 .panel{position:fixed;inset:0;display:flex;justify-content:flex-end;background:rgba(3,8,7,.45)}
 .sheet{width:min(560px,100%);height:100%;background:#0f1a17;border-left:1px solid var(--line);display:flex;flex-direction:column;
-  padding:calc(18px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) 20px}
+  padding:calc(18px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
 .sheet header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
 .sheet h2{font:600 26px var(--display);margin:0}
 .tabs{display:flex;gap:6px;margin-bottom:14px}
 .chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font:500 13px var(--body);cursor:pointer;color:var(--muted)}
 .chip[aria-pressed="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
-.grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-content:start;padding-bottom:8px}
+.grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-content:start;padding-bottom:8px;min-height:0}
 .card{border:0;padding:0;background:transparent;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0}
-.card .th{aspect-ratio:4/3;border-radius:8px;background:#1b2925 center/cover no-repeat;max-width:100%}
+.th{background:#1b2925 center/cover no-repeat}
+.card .th{aspect-ratio:4/3;border-radius:8px;max-width:100%}
 .card:hover .th{outline:2px solid var(--lotus);outline-offset:2px}
 .card strong{font:500 13px/1.25 var(--body);overflow-wrap:anywhere}
 .card small{font:400 11px var(--mono);color:var(--muted)}
 .empty{grid-column:1/-1;color:var(--muted);font-size:14px;line-height:1.55;padding:24px 0}
 .group{margin-bottom:18px}
-.group h3{font:600 11px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.group h3,.results h3{font:600 11px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.note{font-size:13px;color:var(--muted);line-height:1.55;margin-top:auto}
+.note{font-size:13px;color:var(--muted);line-height:1.55;margin:auto 0 0}
+
+/* Search */
+.sform{display:flex;gap:8px}
+.sform input{flex:1;min-width:0;font:400 16px var(--body);color:var(--paper);background:var(--field);border:1px solid var(--line);
+  border-radius:12px;padding:12px 14px;-webkit-appearance:none;appearance:none}
+.sform input::placeholder{color:#7f8f88}
+.go{border:0;border-radius:12px;padding:0 16px;background:var(--lotus);color:var(--ink);font:600 14px var(--body);cursor:pointer;white-space:nowrap}
+.go:disabled{opacity:.6;cursor:default}
+.hint{font-size:13px;color:var(--muted);line-height:1.5;margin:10px 0 16px}
+.results{flex:1;overflow:auto;display:flex;flex-direction:column;gap:2px;min-height:0;padding-bottom:8px}
+.results h3{margin:14px 0 6px}
+.results h3:first-child{margin-top:0}
+.res{display:flex;gap:12px;align-items:center;text-align:left;border:0;background:transparent;padding:8px;border-radius:10px;cursor:pointer;color:var(--paper);width:100%}
+.res:hover,.res:focus-visible{background:rgba(242,244,239,.08)}
+.res .th{width:52px;height:52px;border-radius:8px;flex:none}
+.res span{min-width:0;display:flex;flex-direction:column;gap:3px}
+.res strong{font:500 14px/1.3 var(--body);overflow-wrap:anywhere}
+.res small{font:400 12px/1.35 var(--body);color:var(--muted);overflow-wrap:anywhere}
+.msg{color:var(--muted);font-size:14px;line-height:1.55;padding:6px 8px;margin:0}
+.msg.err{color:var(--lotus)}
+
 .toast{position:fixed;left:50%;bottom:calc(30px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--paper);color:var(--ink);
-  padding:9px 16px;border-radius:999px;font:500 13px var(--body);opacity:0;transition:opacity .25s;pointer-events:none;display:flex;gap:12px;align-items:center;white-space:nowrap}
+  padding:9px 16px;border-radius:999px;font:500 13px var(--body);opacity:0;transition:opacity .25s;pointer-events:none;
+  display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
 .toast.on{opacity:1}
 .toast.act{pointer-events:auto}
-.toast button{border:0;background:var(--ink);color:var(--paper);border-radius:999px;padding:6px 12px;font:600 13px var(--body);cursor:pointer}
-#offline{position:fixed;left:max(18px,env(safe-area-inset-left,0px));top:calc(78px + env(safe-area-inset-top,0px));white-space:nowrap;font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--paper);background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.toast button{border:0;background:var(--ink);color:var(--paper);border-radius:999px;padding:6px 12px;font:600 13px var(--body);cursor:pointer;white-space:nowrap}
+#offline{position:fixed;left:max(18px,env(safe-area-inset-left,0px));top:calc(78px + env(safe-area-inset-top,0px));white-space:nowrap;
+  font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--paper);background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
 
 @media (max-width:640px){
   #inset{width:96px;height:112px;bottom:auto;top:calc(70px + env(safe-area-inset-top,0px))}
   #insetLabel{display:none}
   #brand{display:none}
-  #rail{left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));justify-content:space-between;flex-wrap:wrap}
+  #rail{left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));justify-content:space-between;padding:3px}
   .sep{display:none}
-  .ic{width:34px;height:34px}
-  #rail{padding:3px}
-  #caption{padding-left:max(18px,env(safe-area-inset-left,0px));padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
+  #rail .ic{width:34px;height:34px}
+  #zoom{right:max(14px,env(safe-area-inset-right,0px));bottom:auto;top:50%;translate:0 -50%}
+  #zoom button{width:50px;height:38px}
+  #caption{padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:80px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
   .edge{display:none}
 }
 @media (prefers-reduced-motion:reduce){.layer{transition:none}}
@@ -166,6 +206,8 @@ body.clean #unhide{display:grid}
 <div id="brand"><i>Vicarus</i><span data-t="brand"></span><span id="count"></span></div>
 
 <nav id="rail" aria-label="Tools">
+  <button class="ic" id="searchBtn" data-tip="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+  <span class="sep"></span>
   <button class="ic" id="prevBtn" data-tip="prev"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
   <button class="ic" id="nextBtn" data-tip="next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
   <span class="sep"></span>
@@ -174,11 +216,16 @@ body.clean #unhide{display:grid}
   <button class="ic" id="dlBtn" data-tip="dl"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>
   <span class="sep"></span>
   <button class="ic" id="galBtn" data-tip="gal"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
-  <button class="ic" id="filtBtn" data-tip="filt"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
-  <button class="ic" id="langBtn" data-tip="lang">EN</button>
+  <button class="ic" id="filtBtn" data-tip="opts"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
   <button class="ic" id="hideBtn" data-tip="hide"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><path d="M4 4l16 16"/></svg></button>
 </nav>
 <button class="ic" id="unhide" aria-label="Show"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg></button>
+
+<div id="zoom" role="group">
+  <button id="z3" data-level="3" aria-pressed="false"><b></b><span>km</span></button>
+  <button id="z2" data-level="2" aria-pressed="false"><b></b><span>km</span></button>
+  <button id="z1" data-level="1" aria-pressed="true"><b></b><span>km</span></button>
+</div>
 
 <button class="edge" id="prevEdge" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
 <button class="edge" id="nextEdge" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
@@ -190,8 +237,21 @@ body.clean #unhide{display:grid}
   <div class="meta"><span id="coord"></span><span id="span"></span></div>
 </section>
 
-<div id="inset" title=""><canvas id="insetCv"></canvas><div id="insetLabel"></div></div>
+<div id="inset"><canvas id="insetCv"></canvas><div id="insetLabel"></div></div>
 <div id="attrib">Imagery © Esri, Maxar, Earthstar Geographics</div>
+
+<div class="panel" id="searchPanel" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+    <header><h2 id="searchTitle" data-t="search"></h2><button class="ic" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <form class="sform" id="searchForm" autocomplete="off">
+      <input id="q" type="search" enterkeyhint="search" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button class="go" id="qGo" type="submit" data-t="searchGo"></button>
+    </form>
+    <p class="hint" data-t="searchHint"></p>
+    <div class="results" id="results"></div>
+    <p class="note">© OpenStreetMap contributors · Nominatim</p>
+  </div>
+</div>
 
 <div class="panel" id="galPanel" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="galTitle">
@@ -203,7 +263,8 @@ body.clean #unhide{display:grid}
 
 <div class="panel" id="filtPanel" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="filtTitle">
-    <header><h2 id="filtTitle" data-t="filt"></h2><button class="ic" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <header><h2 id="filtTitle" data-t="opts"></h2><button class="ic" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <div class="group"><h3 data-t="language"></h3><div class="chips" id="langChips"></div></div>
     <div class="group"><h3 data-t="region"></h3><div class="chips" id="regionChips"></div></div>
     <div class="group"><h3 data-t="theme"></h3><div class="chips" id="themeChips"></div></div>
     <p class="note" id="filtNote"></p>
@@ -217,32 +278,57 @@ body.clean #unhide{display:grid}
 (() => {
 "use strict";
 const TILE = (z,y,x) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
-const MAXZ = 18;
+const OSM = "https://nominatim.openstreetmap.org";
+const MAXZ = 18;            // deepest imagery level requested; closer views are scaled up
+const LEVELS = 3;           // zoom steps toward the place: 1×, 2×, 4×
 
 const T = {
-  vi:{brand:"Việt Nam từ trên cao",prev:"Trước",next:"Tiếp",fav:"Yêu thích",maps:"Mở trong Google Maps",dl:"Lưu hoặc chia sẻ hình nền",gal:"Bộ sưu tập",
-      filt:"Bộ lọc",lang:"English",hide:"Ẩn chữ (H)",region:"Vùng",theme:"Chủ đề",favs:"Yêu thích",all:"Tất cả",
-      R:{N:"Miền Bắc",C:"Miền Trung",S:"Miền Nam"},any:"Tất cả",
+  vi:{brand:"Việt Nam từ trên cao",prev:"Trước",next:"Tiếp",fav:"Yêu thích",maps:"Mở trong Google Maps",dl:"Lưu hoặc chia sẻ hình nền",
+      gal:"Bộ sưu tập",opts:"Tùy chọn",hide:"Ẩn chữ (H)",search:"Tìm địa điểm",region:"Vùng",theme:"Chủ đề",language:"Ngôn ngữ",
+      favs:"Yêu thích",all:"Tất cả",any:"Tất cả",
+      R:{N:"Miền Bắc",C:"Miền Trung",S:"Miền Nam"},
       TH:{mtn:"Núi & ruộng bậc thang",sea:"Biển & đảo",water:"Sông, hồ & châu thổ",city:"Đô thị & di sản",karst:"Núi đá vôi & hang động"},
-      span:"khung rộng ≈",km:"km",empty:"Chưa có địa điểm yêu thích. Bấm ♡ khi gặp một khung cảnh bạn thích.",
+      span:"khung rộng ≈",km:"km",zoom:n=>`Mức zoom ${n}`,
+      empty:"Chưa có địa điểm yêu thích. Bấm ♡ khi gặp một khung cảnh bạn thích.",
       note:n=>`${n} địa điểm khớp bộ lọc. Mỗi lần mở app sẽ chọn ngẫu nhiên một địa điểm.`,
       saved:"Đã lưu hình nền",added:"Đã thêm vào yêu thích",removed:"Đã bỏ khỏi yêu thích",
-      dlFail:"Không tải được: máy chủ ảnh chặn xuất hình. Hãy chụp màn hình thay thế.",loading:"Đang tải ảnh vệ tinh",
-      lat:["B","N"],lon:["Đ","T"],ready:"Ảnh đã sẵn sàng",saveBtn:"Lưu ảnh",offline:"Ngoại tuyến · nơi đã xem"},
-  en:{brand:"Vietnam from above",prev:"Previous",next:"Next",fav:"Favorite",maps:"Open in Google Maps",dl:"Save or share wallpaper",gal:"Gallery",
-      filt:"Filters",lang:"Tiếng Việt",hide:"Hide labels (H)",region:"Region",theme:"Theme",favs:"Favorites",all:"All places",
-      R:{N:"North",C:"Central",S:"South"},any:"All",
+      dlFail:"Không lưu được: máy chủ ảnh chặn xuất hình. Hãy chụp màn hình thay thế.",loading:"Đang tải ảnh vệ tinh",
+      ready:"Ảnh đã sẵn sàng",saveBtn:"Lưu ảnh",offline:"Ngoại tuyến · nơi đã xem",
+      searchGo:"Tìm",searchPh:"Tên địa điểm hoặc link Google Maps",
+      searchHint:"Gõ tên một nơi ở Việt Nam rồi nhấn Tìm. Bạn cũng có thể dán link Google Maps hoặc tọa độ, ví dụ 21.0285, 105.8542.",
+      inList:"Có sẵn trong Vicarus",onMap:"Từ bản đồ",searching:"Đang tìm…",
+      noResult:"Không tìm thấy nơi này ở Việt Nam. Thử tên khác, hoặc dán link Google Maps.",
+      outside:"Vị trí này nằm ngoài Việt Nam. Vicarus chỉ hiển thị Việt Nam.",
+      shortLink:"Link rút gọn (maps.app.goo.gl) không đọc được. Hãy mở link trong trình duyệt, rồi chép địa chỉ đầy đủ trên thanh địa chỉ và dán vào đây.",
+      netErr:"Không kết nối được dịch vụ tìm kiếm. Kiểm tra mạng rồi thử lại.",needNet:"Cần có mạng để tìm địa điểm mới.",
+      found:"Địa điểm bạn tìm",lat:["B","N"],lon:["Đ","T"]},
+  en:{brand:"Vietnam from above",prev:"Previous",next:"Next",fav:"Favorite",maps:"Open in Google Maps",dl:"Save or share wallpaper",
+      gal:"Gallery",opts:"Options",hide:"Hide labels (H)",search:"Find a place",region:"Region",theme:"Theme",language:"Language",
+      favs:"Favorites",all:"All places",any:"All",
+      R:{N:"North",C:"Central",S:"South"},
       TH:{mtn:"Mountains & terraces",sea:"Coast & islands",water:"Rivers, lakes & delta",city:"Cities & heritage",karst:"Karst & caves"},
-      span:"frame ≈",km:"km wide",empty:"No favorites yet. Tap ♡ when you find a view you like.",
+      span:"frame ≈",km:"km wide",zoom:n=>`Zoom level ${n}`,
+      empty:"No favorites yet. Tap ♡ when you find a view you like.",
       note:n=>`${n} places match. Each time you open the app, one is picked at random.`,
       saved:"Wallpaper saved",added:"Added to favorites",removed:"Removed from favorites",
-      dlFail:"Download blocked by the imagery server. Take a screenshot instead.",loading:"Loading satellite imagery",
-      lat:["N","S"],lon:["E","W"],ready:"Image ready",saveBtn:"Save image",offline:"Offline · seen places"}
+      dlFail:"Couldn't save: the imagery server blocked the export. Take a screenshot instead.",loading:"Loading satellite imagery",
+      ready:"Image ready",saveBtn:"Save image",offline:"Offline · seen places",
+      searchGo:"Search",searchPh:"Place name or Google Maps link",
+      searchHint:"Type the name of a place in Vietnam and tap Search. You can also paste a Google Maps link or coordinates such as 21.0285, 105.8542.",
+      inList:"Already in Vicarus",onMap:"From the map",searching:"Searching…",
+      noResult:"No place in Vietnam matches that. Try another name, or paste a Google Maps link.",
+      outside:"That location is outside Vietnam. Vicarus only shows Vietnam.",
+      shortLink:"Short links (maps.app.goo.gl) can't be read. Open the link in your browser, then copy the full address from the address bar and paste it here.",
+      netErr:"Couldn't reach the search service. Check your connection and try again.",needNet:"You need a connection to find new places.",
+      found:"Your search",lat:["N","S"],lon:["E","W"]}
 };
 
-const slug = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/gi,"d").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+// ── Data
+const norm = s => (s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[đĐ]/g,"d").toLowerCase();
+const slug = s => norm(s).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 const P = window.PLACES.map((a,i)=>({i,vi:a[0],en:a[1],prov:a[2],reg:a[3],th:a[4],lat:a[5],lon:a[6],z:a[7],id:slug(a[1])}));
-const byId = Object.fromEntries(P.map(p=>[p.id,p]));
+const curated = Object.fromEntries(P.map(p=>[p.id,p]));
+const provReg = Object.fromEntries(P.map(p=>[p.prov,p.reg])); provReg["Bắc Ninh"]="N"; provReg["Hưng Yên"]="N";
 
 const store = {
   get(k,d){try{const v=localStorage.getItem("vnfa:"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
@@ -253,42 +339,90 @@ let favs = new Set(store.get("favs",[]));
 let filt = store.get("filt",{reg:"all",th:"all"});
 let recent = store.get("recent",[]);
 let seen = store.get("seen",[]);
-const hist = []; let hpos = -1; let cur = null;
+let custom = store.get("custom",{});   // places found through search, kept so favorites still work
+const hist = []; let hpos = -1; let cur = null; let level = 1;
 
 const $ = id => document.getElementById(id);
 const stage = $("stage");
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// A place found through search: same shape as a curated place.
+function mkCustom(o){
+  const z = Math.round(o.z*2)/2;
+  const id = `at-${o.lat.toFixed(4)}-${o.lon.toFixed(4)}-${z}`;
+  const prov = o.prov||"";
+  const reg = provReg[prov] || (o.lat>=19.0 ? "N" : o.lat>=11.2 ? "C" : "S");
+  return {id, vi:o.vi||"", en:o.en||o.vi||"", prov, reg, th:"custom", lat:o.lat, lon:o.lon, z, custom:true};
+}
+function placeById(id){
+  if(curated[id]) return curated[id];
+  if(custom[id]) return mkCustom(custom[id]);
+  const m = /^at-(\d+\.\d+)-(\d+\.\d+)-(\d+(?:\.\d+)?)$/.exec(id||"");
+  return m ? mkCustom({lat:+m[1], lon:+m[2], z:+m[3]}) : null;
+}
+function remember(p){
+  if(!p.custom) return;
+  custom[p.id] = {vi:p.vi,en:p.en,prov:p.prov,lat:p.lat,lon:p.lon,z:p.z};
+  const ids = Object.keys(custom);
+  for(const id of ids.slice(0, Math.max(0, ids.length-100))) if(!favs.has(id)) delete custom[id];
+  store.set("custom", custom);
+}
+
+// ── Screen size. Home-screen apps on iPhone can report a viewport shorter than the screen; cover the real screen.
+const standalone = () => navigator.standalone===true || matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches;
+function screenCss(W,H){
+  if(!screen.width || !screen.height) return {W,H};
+  const a = Math.min(screen.width,screen.height), b = Math.max(screen.width,screen.height);
+  return H>=W ? {W:a,H:b} : {W:b,H:a};
+}
+function viewSize(){
+  let W = Math.max(innerWidth, document.documentElement.clientWidth);
+  let H = Math.max(innerHeight, document.documentElement.clientHeight);
+  if(standalone()){ const s = screenCss(W,H); if(Math.abs(s.W-W) < 40){ W = Math.max(W,s.W); H = Math.max(H,s.H); } }
+  return {W:Math.round(W), H:Math.round(H)};
+}
+function fitStage(){ const v = viewSize(); stage.style.width = v.W+"px"; stage.style.height = v.H+"px"; return v; }
 
 // ── Web Mercator
 const mx = lon => (lon+180)/360;
 const my = lat => { const s=Math.sin(lat*Math.PI/180); return .5 - Math.log((1+s)/(1-s))/(4*Math.PI); };
 
-function geometry(p, W, H){
-  // Zoom values are tuned for a ~1600px-wide frame; scale for this screen.
-  const zEff = p.z + Math.log2(Math.max(W, H*1.5)/1600);
-  const dpr = Math.min(window.devicePixelRatio||1, 2);
-  const tz = Math.max(3, Math.min(MAXZ, Math.ceil(zEff + Math.log2(dpr) - 0.15)));
+// Zoom values in the place list are tuned for a ~1600px-wide frame; adapt to this screen and the zoom level.
+const zFor = (p,W,H,lv) => p.z + (lv-1) + Math.log2(Math.max(W, H*1.5)/1600);
+
+function geometry(p, W, H, zEff, scale){
+  const tz = clamp(Math.ceil(zEff + Math.log2(scale) - 0.15), 3, MAXZ);
   const ts = 256 * Math.pow(2, zEff - tz);
   const cx = mx(p.lon)*256*Math.pow(2,zEff), cy = my(p.lat)*256*Math.pow(2,zEff);
   const ox = cx - W/2, oy = cy - H/2;
-  const tiles=[]; const n=Math.pow(2,tz);
+  const tiles = []; const n = Math.pow(2,tz);
   for(let ty=Math.floor(oy/ts); ty<=Math.floor((oy+H)/ts); ty++){
     if(ty<0||ty>=n) continue;
-    for(let tx=Math.floor(ox/ts); tx<=Math.floor((ox+W)/ts); tx++){
+    for(let tx=Math.floor(ox/ts); tx<=Math.floor((ox+W)/ts); tx++)
       tiles.push({x:((tx%n)+n)%n, y:ty, z:tz, l:tx*ts-ox, t:ty*ts-oy});
-    }
   }
   const mpp = 156543.03392*Math.cos(p.lat*Math.PI/180)/Math.pow(2,zEff);
   return {tiles, ts, zEff, km: W*mpp/1000};
 }
 
 let renderToken = 0, lastGeo = null;
-function render(p){
-  const W = innerWidth, H = innerHeight, tok = ++renderToken;
-  const g = geometry(p, W, H); lastGeo = {g, W, H};
-  const layer = document.createElement("div"); layer.className = "layer";
+function render(p, lv, fromLv){
+  const {W,H} = fitStage(); const tok = ++renderToken;
+  const g = geometry(p, W, H, zFor(p,W,H,lv), Math.min(devicePixelRatio||1, 2)); lastGeo = {g, W, H};
+  // Zoom: push the current picture toward the centre while the sharper one loads.
+  if(fromLv && !reduceMotion){
+    for(const old of stage.children){
+      const k = Math.pow(2, lv - (+old.dataset.level||lv));
+      old.style.transformOrigin = `${W/2}px ${H/2}px`;
+      old.style.transition = "transform .9s cubic-bezier(.2,.7,.2,1), opacity 1.1s ease";
+      old.style.transform = `scale(${k})`;
+    }
+  }
+  const layer = document.createElement("div"); layer.className = "layer"; layer.dataset.level = lv;
   let done = 0, shown = false;
   const loader = $("loader");
-  const loaderTimer = setTimeout(()=>{ if(!shown && tok===renderToken) loader.classList.add("on"); }, 500);
+  const loaderTimer = setTimeout(()=>{ if(!shown && tok===renderToken) loader.classList.add("on"); }, 600);
   const reveal = () => {
     if(shown || tok!==renderToken) return; shown = true; clearTimeout(loaderTimer); loader.classList.remove("on");
     requestAnimationFrame(()=>layer.classList.add("on"));
@@ -300,7 +434,7 @@ function render(p){
     img.style.cssText = `left:${Math.round(t.l)}px;top:${Math.round(t.t)}px;width:${Math.ceil(g.ts)+1}px;height:${Math.ceil(g.ts)+1}px`;
     const fin = () => { if(++done >= g.tiles.length*0.85) reveal(); };
     img.onload = fin;
-    img.onerror = () => { if(img.crossOrigin){ img.removeAttribute("crossorigin"); img.dataset.tainted="1"; img.src = TILE(t.z,t.y,t.x)+"?nc"; } else { img.style.visibility="hidden"; fin(); } };
+    img.onerror = () => { if(img.crossOrigin){ img.removeAttribute("crossorigin"); img.src = TILE(t.z,t.y,t.x)+"?nc"; } else { img.style.visibility="hidden"; fin(); } };
     img.src = TILE(t.z,t.y,t.x);
     layer.appendChild(img);
   }
@@ -311,56 +445,67 @@ function render(p){
 
 // ── Caption
 function dms(v, pair){
-  const h = v>=0?pair[0]:pair[1]; v=Math.abs(v);
-  const t=Math.round(v*3600), d=Math.floor(t/3600), m=Math.floor(t%3600/60), s=t%60;
+  const h = v>=0?pair[0]:pair[1];
+  const t = Math.round(Math.abs(v)*3600), d = Math.floor(t/3600), m = Math.floor(t%3600/60), s = t%60;
   return `${d}°${String(m).padStart(2,"0")}′${String(s).padStart(2,"0")}″${h}`;
 }
-function fmtKm(k){ const v = k<10?k.toFixed(1):Math.round(k).toString(); return lang==="vi"?v.replace(".",","):v; }
+function fmtKm(k){ const v = k<1 ? k.toFixed(2) : k<10 ? k.toFixed(1) : Math.round(k).toString(); return lang==="vi"?v.replace(".",","):v; }
+const nameOf = p => (lang==="vi" ? p.vi : p.en) || p.vi || p.en || `${p.lat.toFixed(4)}, ${p.lon.toFixed(4)}`;
 
 function caption(p, g){
   const t = T[lang];
-  $("region").textContent = t.R[p.reg];
+  $("region").textContent = t.R[p.reg] || "";
   $("province").textContent = p.prov;
-  $("name").textContent = lang==="vi"?p.vi:p.en;
-  $("alt").textContent = lang==="vi"?p.en:p.vi;
+  $("name").textContent = nameOf(p);
+  const other = lang==="vi" ? p.en : p.vi;
+  $("alt").textContent = other && other!==nameOf(p) ? other : (p.custom ? t.found : "");
   $("coord").innerHTML = `<b>${dms(p.lat,t.lat)}</b>&nbsp; <b>${dms(p.lon,t.lon)}</b>`;
   $("span").textContent = `${t.span} ${fmtKm(g.km)} ${t.km}`;
   $("favBtn").setAttribute("aria-pressed", favs.has(p.id));
-  const mz = Math.max(3, Math.round(g.zEff));
-  $("mapsBtn").href = `https://www.google.com/maps/@${p.lat},${p.lon},${mz}z/data=!3m1!1e3`;
-  const list = pool();
-  const idx = list.indexOf(p);
+  $("mapsBtn").href = `https://www.google.com/maps/@${p.lat.toFixed(5)},${p.lon.toFixed(5)},${Math.max(3, Math.round(g.zEff))}z/data=!3m1!1e3`;
+  const list = pool(), idx = list.indexOf(p);
   $("count").textContent = idx>=0 ? `${String(idx+1).padStart(3,"0")} / ${list.length}` : "";
   $("insetLabel").textContent = `${p.lat.toFixed(2)}, ${p.lon.toFixed(2)}`;
-  document.title = `${lang==="vi"?p.vi:p.en} · Vicarus`;
+  document.title = `${nameOf(p)} · Vicarus`;
+  for(let L=1; L<=LEVELS; L++){
+    const b = $("z"+L), km = g.km * Math.pow(2, level-L);
+    b.querySelector("b").textContent = fmtKm(km);
+    b.setAttribute("aria-pressed", L===level);
+    b.setAttribute("aria-label", `${t.zoom(L)} · ${t.span} ${fmtKm(km)} ${t.km}`);
+    b.title = t.zoom(L);
+  }
   drawInset(p);
 }
 
 function show(p, push=true){
-  cur = p;
+  cur = p; level = 1;
   if(push){ hist.splice(hpos+1); hist.push(p); hpos = hist.length-1; }
-  recent = [p.id, ...recent.filter(x=>x!==p.id)].slice(0, Math.min(40, Math.floor(P.length/2)));
-  store.set("recent", recent);
+  remember(p);
+  if(!p.custom){ recent = [p.id, ...recent.filter(x=>x!==p.id)].slice(0, Math.min(40, Math.floor(P.length/2))); store.set("recent", recent); }
   seen = [p.id, ...seen.filter(x=>x!==p.id)].slice(0,300); store.set("seen", seen);
   try{ history.replaceState(null,"","#"+p.id); }catch(e){}
-  const g = render(p);
-  caption(p, g);
+  caption(p, render(p, level));
 }
+function setLevel(n){
+  n = clamp(n, 1, LEVELS); if(!cur || n===level) return;
+  const from = level; level = n;
+  caption(cur, render(cur, level, from));
+}
+const cycleZoom = () => setLevel(level===LEVELS ? 1 : level+1);
 
-function pool(){
-  return P.filter(p => (filt.reg==="all"||p.reg===filt.reg) && (filt.th==="all"||p.th===filt.th));
-}
+function pool(){ return P.filter(p => (filt.reg==="all"||p.reg===filt.reg) && (filt.th==="all"||p.th===filt.th)); }
 function randomPlace(){
   let list = pool(); if(!list.length) list = P;
-  if(!navigator.onLine){ const s = list.filter(p=>seen.includes(p.id)); const s2 = P.filter(p=>seen.includes(p.id)); list = s.length>1?s:(s2.length?s2:list); }
+  if(!navigator.onLine){ const s = list.filter(p=>seen.includes(p.id)), s2 = P.filter(p=>seen.includes(p.id)); list = s.length>1 ? s : (s2.length ? s2 : list); }
   const fresh = list.filter(p=>!recent.includes(p.id) && p!==cur);
   const from = fresh.length ? fresh : list.filter(p=>p!==cur);
-  return (from.length?from:list)[Math.floor(Math.random()*(from.length?from.length:list.length))];
+  const L = from.length ? from : list;
+  return L[Math.floor(Math.random()*L.length)];
 }
 function next(){ if(hpos < hist.length-1){ hpos++; show(hist[hpos], false); } else show(randomPlace()); }
 function prev(){ if(hpos > 0){ hpos--; show(hist[hpos], false); } }
 
-// ── Constellation inset: every place as a dot; the S-curve of the country draws itself.
+// ── Dot-map inset
 const B = {w:102.0,e:115.0,s:8.2,n:23.5};
 function drawInset(p){
   const cv = $("insetCv"), r = cv.getBoundingClientRect(); if(!r.width) return;
@@ -377,39 +522,41 @@ function drawInset(p){
   c.fillStyle="#e9a6b4"; c.beginPath(); c.arc(x,y,2.6,0,7); c.fill();
 }
 
-// ── Favorites, toast
+// ── Toast, favorites
 let toastT;
 function toast(msg, action, label){
   const el=$("toast"); el.textContent=msg; el.classList.toggle("act", !!action);
   if(action){ const b=document.createElement("button"); b.textContent=label; b.onclick=()=>{ el.classList.remove("on","act"); action(); }; el.appendChild(b); }
-  el.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("on","act"), action?7000:1800);
+  el.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("on","act"), action?7000:2200);
 }
 function toggleFav(){
   if(!cur) return;
-  if(favs.has(cur.id)){ favs.delete(cur.id); toast(T[lang].removed); } else { favs.add(cur.id); toast(T[lang].added); }
+  if(favs.has(cur.id)){ favs.delete(cur.id); toast(T[lang].removed); } else { favs.add(cur.id); remember(cur); toast(T[lang].added); }
   store.set("favs",[...favs]); $("favBtn").setAttribute("aria-pressed", favs.has(cur.id));
 }
 
-// ── Download: redraw the visible tiles onto a canvas at device resolution.
+// ── Wallpaper: render at the exact pixel size of this screen (1179 × 2556 on iPhone 15), same centre and scale as the view.
 async function download(){
-  if(!cur||!lastGeo) return;
-  const {W,H} = lastGeo; const d = Math.min(devicePixelRatio||1,2);
-  const g = geometry(cur, W, H);
-  const cv = document.createElement("canvas"); cv.width=Math.round(W*d); cv.height=Math.round(H*d);
-  const c = cv.getContext("2d"); c.scale(d,d); c.fillStyle="#0b1412"; c.fillRect(0,0,W,H);
+  if(!cur || !lastGeo) return;
+  const {W,H} = lastGeo;
+  const scale = clamp(devicePixelRatio||1, 1, 3);
+  const s = screenCss(W,H);
+  const g = geometry(cur, s.W, s.H, lastGeo.g.zEff, scale);
+  const cv = document.createElement("canvas"); cv.width = Math.round(s.W*scale); cv.height = Math.round(s.H*scale);
+  const c = cv.getContext("2d"); c.scale(scale,scale); c.fillStyle="#0b1412"; c.fillRect(0,0,s.W,s.H);
   const load = t => new Promise(res=>{ const i=new Image(); i.crossOrigin="anonymous"; i.onload=()=>res(i); i.onerror=()=>res(null); i.src=TILE(t.z,t.y,t.x); });
   const imgs = await Promise.all(g.tiles.map(load));
   imgs.forEach((im,k)=>{ if(im){ const t=g.tiles[k]; c.drawImage(im, t.l, t.t, g.ts+0.5, g.ts+0.5); }});
-  c.font = `500 ${Math.max(11,Math.round(W/150))}px "Be Vietnam Pro", sans-serif`;
-  c.textAlign="right"; c.fillStyle="rgba(255,255,255,.75)"; c.shadowColor="rgba(0,0,0,.6)"; c.shadowBlur=6;
-  c.fillText(`Vicarus · ${cur.vi} · ${cur.prov} — Imagery © Esri, Maxar`, W-18, H-16);
+  c.font = `500 ${Math.max(8, Math.round(s.W/48))}px "Be Vietnam Pro", system-ui, sans-serif`;
+  c.textAlign = "center"; c.fillStyle = "rgba(255,255,255,.7)"; c.shadowColor = "rgba(0,0,0,.6)"; c.shadowBlur = 4;
+  c.fillText(`${nameOf(cur)} · Imagery © Esri, Maxar`, s.W/2, s.H - Math.max(12, s.H*0.012));
   let blob = null;
   try{ blob = await new Promise(r=>cv.toBlob(r,"image/png")); }catch(e){}
   if(!blob){ toast(T[lang].dlFail); return; }
-  const fname = `vicarus-${cur.id}.png`;
+  const fname = `vicarus-${slug(nameOf(cur))||"view"}.png`;
   const file = new File([blob], fname, {type:"image/png"});
   const share = async () => {
-    try{ await navigator.share({files:[file], title: lang==="vi"?cur.vi:cur.en}); }
+    try{ await navigator.share({files:[file], title:nameOf(cur)}); }
     catch(e){ if(e && e.name==="NotAllowedError") toast(T[lang].ready, share, T[lang].saveBtn); }
   };
   if(navigator.canShare && navigator.canShare({files:[file]})){ await share(); return; }
@@ -421,48 +568,164 @@ async function download(){
 // ── Gallery
 let galTab = "fav";
 function thumb(p){
-  const z = Math.max(3,p.z-1), n=Math.pow(2,z);
+  const z = clamp(Math.round(p.z)-1, 3, MAXZ), n = Math.pow(2,z);
   return TILE(z, Math.floor(my(p.lat)*n), Math.floor(mx(p.lon)*n));
 }
 function renderGallery(){
   const t=T[lang];
   $("tabFav").textContent = `${t.favs} (${favs.size})`; $("tabAll").textContent = `${t.all} (${P.length})`;
   $("tabFav").setAttribute("aria-pressed", galTab==="fav"); $("tabAll").setAttribute("aria-pressed", galTab==="all");
-  const list = galTab==="fav" ? P.filter(p=>favs.has(p.id)) : P;
+  const list = galTab==="fav" ? [...favs].map(placeById).filter(Boolean) : P;
   const grid = $("galGrid"); grid.innerHTML = "";
   if(!list.length){ grid.innerHTML = `<p class="empty">${t.empty}</p>`; return; }
   for(const p of list){
     const b=document.createElement("button"); b.className="card";
-    b.innerHTML = `<div class="th" style="background-image:url('${thumb(p)}')"></div><strong></strong><small></small>`;
-    b.querySelector("strong").textContent = lang==="vi"?p.vi:p.en;
+    b.innerHTML = `<div class="th"></div><strong></strong><small></small>`;
+    b.querySelector(".th").style.backgroundImage = `url('${thumb(p)}')`;
+    b.querySelector("strong").textContent = nameOf(p);
     b.querySelector("small").textContent = p.prov;
     b.onclick = () => { closePanels(); show(p); };
     grid.appendChild(b);
   }
 }
 
-// ── Filters
+// ── Options: language and filters
 function renderFilters(){
   const t=T[lang];
-  const mk = (box, key, opts) => {
+  const mk = (box, cur, opts, set) => {
     box.innerHTML="";
     for(const [v,label] of opts){
       const b=document.createElement("button"); b.className="chip"; b.textContent=label;
-      b.setAttribute("aria-pressed", filt[key]===v);
-      b.onclick=()=>{ filt[key]=v; store.set("filt",filt); renderFilters(); };
+      b.setAttribute("aria-pressed", cur===v); b.onclick=()=>{ set(v); renderFilters(); };
       box.appendChild(b);
     }
   };
-  mk($("regionChips"),"reg",[["all",t.any],...Object.entries(t.R)]);
-  mk($("themeChips"),"th",[["all",t.any],...Object.entries(t.TH)]);
+  mk($("langChips"), lang, [["vi","Tiếng Việt"],["en","English"]], v=>{ lang=v; store.set("lang",lang); applyLang(); });
+  mk($("regionChips"), filt.reg, [["all",t.any],...Object.entries(t.R)], v=>{ filt.reg=v; store.set("filt",filt); });
+  mk($("themeChips"), filt.th, [["all",t.any],...Object.entries(t.TH)], v=>{ filt.th=v; store.set("filt",filt); });
   $("filtNote").textContent = t.note(pool().length);
 }
 
-function openPanel(id){ closePanels(); $(id).hidden=false; if(id==="galPanel") renderGallery(); else renderFilters(); }
-function closePanels(){
+// ── Search: curated list first, then OpenStreetMap (Vietnam only); Google Maps links and coordinates are read directly.
+const inVN = (lat,lon) => lat>=8.0 && lat<=23.6 && lon>=102.0 && lon<=117.5;
+function cleanProv(a){
+  let s = a.state || a.province || a.city || a.region || "";
+  if(/^Thành phố Hồ Chí Minh$/i.test(s)) return "TP. Hồ Chí Minh";
+  return s.replace(/^(Tỉnh|Thành phố)\s+/i,"");
+}
+function fromOSM(r){
+  const nd = r.namedetails||{}, a = r.address||{};
+  const vi = nd["name:vi"] || nd.name || (r.display_name||"").split(",")[0];
+  const en = nd["name:en"] || nd.int_name || vi;
+  let lat = +r.lat, lon = +r.lon, z = 15.5;
+  const bb = (r.boundingbox||[]).map(Number);
+  if(bb.length===4){
+    const [s,n,w,e] = bb, dx = mx(e)-mx(w), dy = my(s)-my(n);
+    if(dx>0 && dy>0) z = Math.log2(Math.min(0.62*1600/(256*dx), 0.62*1000/(256*dy)));
+    z = clamp(z, 8, 16);
+    if(z < 12.5){ lat = (s+n)/2; lon = (w+e)/2; }   // large areas: frame the whole thing
+  }
+  const p = mkCustom({vi, en, prov:cleanProv(a), lat, lon, z});
+  p.where = (r.display_name||"").split(",").slice(1).map(x=>x.trim()).filter(x=>x && !/^Việt Nam$|^Vietnam$/i.test(x) && !/^\d{5,6}$/.test(x)).slice(0,3).join(", ");
+  return p;
+}
+function metersToZ(m, lat){ return Math.log2(156543.03*Math.cos(lat*Math.PI/180)/(m/900)); }
+function parseLink(q){
+  q = q.trim();
+  if(/maps\.app\.goo\.gl|goo\.gl\/maps/i.test(q)) return {short:true};
+  let lat=null, lon=null, z=null, name=null, m;
+  if((m = /\/maps\/place\/([^/@?]+)/.exec(q))) { try{ name = decodeURIComponent(m[1].replace(/\+/g," ")); }catch(e){} }
+  if((m = /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/.exec(q))) { lat=+m[1]; lon=+m[2]; }
+  if((m = /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(\d+(?:\.\d+)?)([zm])/.exec(q))) {
+    if(lat==null){ lat=+m[1]; lon=+m[2]; }
+    z = m[4]==="z" ? +m[3] : metersToZ(+m[3], lat);
+  }
+  if(lat==null && (m = /[?&](?:q|ll|query|center|destination)=(-?\d+(?:\.\d+)?)(?:,|%2C)\s*(-?\d+(?:\.\d+)?)/i.exec(q))) { lat=+m[1]; lon=+m[2]; }
+  if(lat==null && (m = /^(-?\d{1,2}(?:[.,]\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:[.,]\d+)?)$/.exec(q))) { lat=+m[1].replace(",","."); lon=+m[2].replace(",","."); }
+  if(lat==null || !isFinite(lat) || !isFinite(lon)) return null;
+  if(name && /^-?\d+(\.\d+)?,/.test(name)) name = null;
+  return {lat, lon, z: clamp(z ?? 15.5, 8, 16), name};
+}
+async function osm(path){
+  const r = await fetch(`${OSM}${path}&format=jsonv2&addressdetails=1&namedetails=1&accept-language=vi`);
+  if(!r.ok) throw new Error("http "+r.status);
+  return r.json();
+}
+function localMatches(q){
+  const toks = norm(q).split(/\s+/).filter(Boolean); if(!toks.length || norm(q).trim().length<2) return [];
+  return P.filter(p => { const h = norm(`${p.vi} ${p.en} ${p.prov}`); return toks.every(t=>h.includes(t)); }).slice(0,6);
+}
+function resItem(p, sub){
+  const b=document.createElement("button"); b.className="res"; b.type="button";
+  b.innerHTML = `<div class="th"></div><span><strong></strong><small></small></span>`;
+  b.querySelector(".th").style.backgroundImage = `url('${thumb(p)}')`;
+  b.querySelector("strong").textContent = nameOf(p);
+  b.querySelector("small").textContent = sub;
+  b.onclick = () => { closePanels(); show(p); };
+  return b;
+}
+let localBox, remoteBox;
+function renderLocal(q){
+  const box = $("results"); box.innerHTML = "";
+  localBox = document.createElement("div"); remoteBox = document.createElement("div");
+  box.append(localBox, remoteBox);
+  const L = localMatches(q);
+  if(L.length){
+    const h=document.createElement("h3"); h.textContent=T[lang].inList; localBox.appendChild(h);
+    L.forEach(p=>localBox.appendChild(resItem(p, `${T[lang].R[p.reg]} · ${p.prov}`)));
+  }
+}
+function remoteMsg(text, err){ remoteBox.innerHTML = ""; const m=document.createElement("p"); m.className="msg"+(err?" err":""); m.textContent=text; remoteBox.appendChild(m); }
+let searchSeq = 0;
+async function runSearch(q){
+  const t = T[lang]; q = q.trim(); if(!q) return;
+  renderLocal(q);
+  const link = parseLink(q);
+  if(link && link.short){ remoteMsg(t.shortLink, true); return; }
+  if(!navigator.onLine && !link){ remoteMsg(t.needNet, true); return; }
+  const seq = ++searchSeq; const go = $("qGo"); go.disabled = true;
+  try{
+    if(link){
+      if(!inVN(link.lat, link.lon)){ remoteMsg(t.outside, true); return; }
+      remoteMsg(t.searching);
+      let p = mkCustom({vi:link.name||"", en:link.name||"", prov:"", lat:link.lat, lon:link.lon, z:link.z});
+      try{
+        const r = await osm(`/reverse?lat=${link.lat}&lon=${link.lon}&zoom=14`);
+        if(r && r.address && r.address.country_code && r.address.country_code!=="vn"){ if(seq===searchSeq) remoteMsg(t.outside, true); return; }
+        if(r && r.address){
+          const o = fromOSM(r);
+          p = mkCustom({vi: link.name || o.vi, en: link.name || o.en, prov: o.prov, lat:link.lat, lon:link.lon, z:link.z});
+        }
+      }catch(e){ /* name lookup is optional; show the place anyway */ }
+      if(seq!==searchSeq) return;
+      closePanels(); show(p); return;
+    }
+    remoteMsg(t.searching);
+    const res = await osm(`/search?q=${encodeURIComponent(q)}&countrycodes=vn&limit=8`);
+    if(seq!==searchSeq) return;
+    remoteBox.innerHTML = "";
+    const items = (res||[]).map(fromOSM).filter(p=>inVN(p.lat,p.lon));
+    if(!items.length){ if(!localBox.childElementCount) remoteMsg(t.noResult); return; }
+    const h=document.createElement("h3"); h.textContent=t.onMap; remoteBox.appendChild(h);
+    items.forEach(p=>remoteBox.appendChild(resItem(p, p.where || p.prov)));
+  }catch(e){
+    if(seq===searchSeq) remoteMsg(t.netErr, true);
+  }finally{ if(seq===searchSeq) go.disabled = false; }
+}
+$("searchForm").addEventListener("submit", e => { e.preventDefault(); $("q").blur(); runSearch($("q").value); });
+$("q").addEventListener("input", e => { const v=e.target.value; if(!parseLink(v)) renderLocal(v); });
+
+// ── Panels
+function openPanel(id){
+  closePanels(true); $(id).hidden=false;
+  if(id==="galPanel") renderGallery();
+  else if(id==="filtPanel") renderFilters();
+  else { $("q").value=""; $("results").innerHTML=""; setTimeout(()=>$("q").focus(), 50); }
+}
+function closePanels(silent){
   const wasFilt = !$("filtPanel").hidden;
-  $("galPanel").hidden=true; $("filtPanel").hidden=true;
-  if(wasFilt && cur){ const list=pool(); if(list.length && !list.includes(cur)) show(randomPlace()); else caption(cur, lastGeo.g); }
+  ["galPanel","filtPanel","searchPanel"].forEach(id=>$(id).hidden=true);
+  if(silent!==true && wasFilt && cur && !cur.custom){ const list=pool(); if(list.length && !list.includes(cur)) show(randomPlace()); else if(lastGeo) caption(cur, lastGeo.g); }
 }
 
 // ── Language
@@ -470,27 +733,30 @@ function applyLang(){
   const t=T[lang]; document.documentElement.lang = lang;
   document.querySelectorAll("[data-t]").forEach(el=>{ el.textContent = t[el.dataset.t]; });
   document.querySelectorAll("[data-tip]").forEach(el=>{ const s=t[el.dataset.tip]; el.title=s; el.setAttribute("aria-label",s); });
-  $("langBtn").textContent = lang==="vi"?"EN":"VI";
+  $("zoom").setAttribute("aria-label", t.zoom("").trim());
+  $("q").placeholder = t.searchPh;
   $("loader").textContent = t.loading;
+  netBadge();
   if(cur && lastGeo) caption(cur, lastGeo.g);
   if(!$("galPanel").hidden) renderGallery();
-  if(!$("filtPanel").hidden) renderFilters();
 }
+function netBadge(){ const o=$("offline"); o.textContent=T[lang].offline; o.hidden = navigator.onLine; }
 
 // ── Wiring
 $("nextBtn").onclick=next; $("nextEdge").onclick=next;
 $("prevBtn").onclick=prev; $("prevEdge").onclick=prev;
 $("favBtn").onclick=toggleFav; $("dlBtn").onclick=download;
+$("searchBtn").onclick=()=>openPanel("searchPanel");
 $("galBtn").onclick=()=>openPanel("galPanel"); $("filtBtn").onclick=()=>openPanel("filtPanel");
 $("tabFav").onclick=()=>{galTab="fav";renderGallery()}; $("tabAll").onclick=()=>{galTab="all";renderGallery()};
-$("langBtn").onclick=()=>{ lang = lang==="vi"?"en":"vi"; store.set("lang",lang); applyLang(); netBadge(); };
+document.querySelectorAll("#zoom button").forEach(b=>b.onclick=()=>setLevel(+b.dataset.level));
 const toggleClean=()=>document.body.classList.toggle("clean");
 $("hideBtn").onclick=toggleClean; $("unhide").onclick=toggleClean;
-document.querySelectorAll("[data-close]").forEach(b=>b.onclick=closePanels);
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>closePanels());
 document.querySelectorAll(".panel").forEach(p=>p.addEventListener("click",e=>{ if(e.target===p) closePanels(); }));
 addEventListener("keydown",e=>{
   if(e.metaKey||e.ctrlKey||e.altKey) return;
-  const panelOpen = !$("galPanel").hidden || !$("filtPanel").hidden;
+  const panelOpen = ["galPanel","filtPanel","searchPanel"].some(id=>!$(id).hidden);
   if(e.key==="Escape"){ if(panelOpen) closePanels(); else document.body.classList.remove("clean"); return; }
   if(panelOpen) return;
   const k=e.key.toLowerCase();
@@ -500,23 +766,43 @@ addEventListener("keydown",e=>{
   else if(k==="d") download();
   else if(k==="g") openPanel("galPanel");
   else if(k==="h") toggleClean();
+  else if(k==="/"||k==="s"){ e.preventDefault(); openPanel("searchPanel"); }
+  else if(k==="+"||k==="="||k==="arrowup") setLevel(level+1);
+  else if(k==="-"||k==="_"||k==="arrowdown") setLevel(level-1);
+  else if(k==="1"||k==="2"||k==="3") setLevel(+k);
 });
-let rT; addEventListener("resize",()=>{ clearTimeout(rT); rT=setTimeout(()=>{ if(cur){ const g=render(cur); caption(cur,g);} },250); });
-// Swipe on touch screens
-let sx=null; stage.addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});
-stage.addEventListener("touchend",e=>{ if(sx==null) return; const dx=e.changedTouches[0].clientX-sx; sx=null; if(Math.abs(dx)>60) (dx<0?next:prev)(); });
+let rT; addEventListener("resize",()=>{ clearTimeout(rT); rT=setTimeout(()=>{ if(cur) caption(cur, render(cur, level)); },250); });
+
+// Touch: swipe for next/previous, pinch or double-tap to zoom toward the place.
+document.addEventListener("gesturestart", e=>e.preventDefault());
+const dist = ts => Math.hypot(ts[0].clientX-ts[1].clientX, ts[0].clientY-ts[1].clientY);
+let t0=null, pinch0=0, pinchNow=0, lastTap=0;
+stage.addEventListener("touchstart",e=>{
+  if(e.touches.length===2){ pinch0=pinchNow=dist(e.touches); t0=null; return; }
+  if(e.touches.length===1 && !pinch0) t0={x:e.touches[0].clientX, y:e.touches[0].clientY, t:Date.now()};
+},{passive:true});
+stage.addEventListener("touchmove",e=>{ if(e.touches.length===2 && pinch0) pinchNow=dist(e.touches); },{passive:true});
+stage.addEventListener("touchend",e=>{
+  if(pinch0){ if(!e.touches.length){ const r=pinchNow/pinch0; pinch0=0; if(r>1.2) setLevel(level+1); else if(r<0.83) setLevel(level-1); } return; }
+  if(!t0) return;
+  const c=e.changedTouches[0], dx=c.clientX-t0.x, dy=c.clientY-t0.y, dt=Date.now()-t0.t; t0=null;
+  if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.3){ lastTap=0; (dx<0?next:prev)(); return; }
+  if(Math.abs(dx)<14 && Math.abs(dy)<14 && dt<300){
+    const now=Date.now(); if(now-lastTap<330){ lastTap=0; e.preventDefault(); cycleZoom(); } else lastTap=now;
+  }
+});
+stage.addEventListener("dblclick", cycleZoom);
 
 let hiddenAt = 0;
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden){ hiddenAt = Date.now(); return; }
-  if(hiddenAt && Date.now()-hiddenAt > 30*60*1000 && $("galPanel").hidden && $("filtPanel").hidden) show(randomPlace());
+  if(hiddenAt && Date.now()-hiddenAt > 30*60*1000 && ["galPanel","filtPanel","searchPanel"].every(id=>$(id).hidden)) show(randomPlace());
 });
-const netBadge = () => { const o=$("offline"); o.textContent=T[lang].offline; o.hidden = navigator.onLine; };
 addEventListener("online", netBadge); addEventListener("offline", netBadge);
 if("serviceWorker" in navigator && window.isSecureContext){ addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{})); }
 
-applyLang(); netBadge();
-const fromHash = byId[decodeURIComponent(location.hash.slice(1))];
+applyLang();
+const fromHash = placeById(decodeURIComponent(location.hash.slice(1)));
 show(fromHash || randomPlace());
 })();
 </script>
