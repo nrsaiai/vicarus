@@ -101,7 +101,7 @@ button{font:inherit;color:inherit}
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
 #zoom button{width:56px;height:40px;border:0;border-radius:10px;background:transparent;color:var(--muted);cursor:pointer;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font:400 10px/1 var(--mono);font-variant-numeric:tabular-nums}
-#zoom button b{font:600 13px/1 var(--mono);color:var(--paper)}
+#zoom button b{font:600 14px/1 var(--mono);color:var(--paper)}
 #zoom button:hover{background:rgba(242,244,239,.12)}
 #zoom .zc svg{width:20px;height:20px;fill:none;stroke:var(--lotus);stroke-width:1.7;stroke-linecap:round}
 #zoom button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
@@ -203,7 +203,7 @@ body.clean #unhide{display:grid}
 .msg{color:var(--muted);font-size:14px;line-height:1.55;padding:6px 8px;margin:0}
 .msg.err{color:var(--lotus)}
 
-.toast{position:fixed;left:50%;bottom:calc(30px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--paper);color:var(--ink);
+.toast{position:fixed;left:50%;top:calc(116px + env(safe-area-inset-top,0px));translate:-50% 0;background:var(--paper);color:var(--ink);
   padding:9px 16px;border-radius:999px;font:500 13px var(--body);opacity:0;transition:opacity .25s;pointer-events:none;
   display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
 .toast.on{opacity:1}
@@ -222,7 +222,7 @@ body.clean #unhide{display:grid}
   #rail .ic{width:32px;height:32px}
   #rail .ic svg{width:19px;height:19px}
   #themes{top:calc(64px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));right:0;padding-right:16px}
-  #zoom button{width:46px;height:32px}
+  #zoom button{width:44px;height:34px}
   #name{font-size:28px}
   #caption{max-width:100%;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:160px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
   .edge{display:none}
@@ -264,19 +264,19 @@ body.clean #unhide{display:grid}
   <div class="eyebrow"><span id="region"></span><span class="dot" id="dot">·</span><span id="province"></span></div>
   <h1 id="name"></h1>
   <p id="alt"></p>
-  <div class="meta"><span id="coord"></span><span id="span"></span></div>
+  <div class="meta"><span id="coord"></span></div>
 </section>
 
 <div id="dock">
   <div id="zoom" role="group">
     <button id="zc" class="zc" type="button" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></button>
-    <button id="z3" data-level="3" aria-pressed="false"><b></b><span>km</span></button>
-    <button id="z2" data-level="2" aria-pressed="false"><b></b><span>km</span></button>
-    <button id="z1" data-level="1" aria-pressed="true"><b></b><span>km</span></button>
+    <button id="z3" data-level="3" aria-pressed="false"><b>3×</b></button>
+    <button id="z2" data-level="2" aria-pressed="false"><b>2×</b></button>
+    <button id="z1" data-level="1" aria-pressed="true"><b>1×</b></button>
   </div>
   <div id="inset"><canvas id="insetCv"></canvas><div id="insetLabel"></div></div>
 </div>
-<div id="attrib">Imagery © Esri, Maxar, Earthstar Geographics · v9</div>
+<div id="attrib">Imagery © Esri, Maxar, Earthstar Geographics · v0.10</div>
 
 <div class="panel" id="searchPanel" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
@@ -327,7 +327,7 @@ body.clean #unhide{display:grid}
 "use strict";
 const TILE = (z,y,x) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
 const OSM = "https://nominatim.openstreetmap.org";
-const APP_VERSION = "9";
+const APP_VERSION = "0.10";
 const MAXZ = 18;            // deepest imagery level requested; closer views are scaled up
 const LEVELS = 3;           // zoom steps toward the place: 1×, 2×, 4×
 
@@ -524,7 +524,6 @@ function caption(p, g){
   const other = lang==="vi" ? p.en : p.vi;
   $("alt").textContent = other && other!==nameOf(p) ? other : (p.custom ? t.found : "");
   $("coord").innerHTML = `<b>${dms(view.lat,t.lat)}</b>&nbsp; <b>${dms(view.lon,t.lon)}</b>`;
-  $("span").textContent = `${t.span} ${fmtKm(g.km)} ${t.km}`;
   $("favBtn").setAttribute("aria-pressed", favs.has(p.id));
   $("mapsBtn").href = `https://www.google.com/maps/@${view.lat.toFixed(5)},${view.lon.toFixed(5)},${Math.max(3, Math.round(g.zEff))}z/data=!3m1!1e3`;
   const list = pool(), idx = list.indexOf(p);
@@ -532,10 +531,9 @@ function caption(p, g){
   $("insetLabel").textContent = `${view.lat.toFixed(2)}, ${view.lon.toFixed(2)}`;
   document.title = `${nameOf(p)} · Vicarus`;
   for(let L=1; L<=LEVELS; L++){
-    const b = $("z"+L), km = g.km * Math.pow(2, level-L);
-    b.querySelector("b").textContent = fmtKm(km);
+    const b = $("z"+L);
     b.setAttribute("aria-pressed", L===level);
-    b.setAttribute("aria-label", `${t.zoom(L)} · ${t.span} ${fmtKm(km)} ${t.km}`);
+    b.setAttribute("aria-label", t.zoom(L+"×"));
     b.title = t.zoom(L);
   }
   const zc = $("zc"); zc.hidden = !moved(); zc.title = t.recenter; zc.setAttribute("aria-label", t.recenter);
