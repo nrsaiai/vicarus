@@ -250,7 +250,7 @@ body.clean #unhide{display:grid}
   <span class="sep"></span>
   <button class="ic" id="galBtn" data-tip="gal"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
   <button class="ic" id="filtBtn" data-tip="opts"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
-  <button class="ic tool" id="handBtn" data-tip="hand" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></button>
+  <button class="ic tool" id="handBtn" data-tip="hand" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></button>
   <button class="ic" id="hideBtn" data-tip="hide"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><path d="M4 4l16 16"/></svg></button>
 </nav>
 <div id="themes" role="toolbar"></div>
@@ -276,7 +276,7 @@ body.clean #unhide{display:grid}
   </div>
   <div id="inset"><canvas id="insetCv"></canvas><div id="insetLabel"></div></div>
 </div>
-<div id="attrib">Imagery © Esri, Maxar, Earthstar Geographics · v0.10</div>
+<div id="attrib">Imagery © Esri, Maxar, Earthstar Geographics · v0.11</div>
 
 <div class="panel" id="searchPanel" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
@@ -327,7 +327,7 @@ body.clean #unhide{display:grid}
 "use strict";
 const TILE = (z,y,x) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
 const OSM = "https://nominatim.openstreetmap.org";
-const APP_VERSION = "0.10";
+const APP_VERSION = "0.11";
 const MAXZ = 18;            // deepest imagery level requested; closer views are scaled up
 const LEVELS = 3;           // zoom steps toward the place: 1×, 2×, 4×
 
@@ -985,9 +985,9 @@ let rT; addEventListener("resize",()=>{ clearTimeout(rT); rT=setTimeout(()=>{ if
 // Pinch, double-tap/double-click or the mouse wheel change the zoom level in both modes.
 document.addEventListener("gesturestart", e=>e.preventDefault());
 stage.addEventListener("dragstart", e => e.preventDefault());
-let handOn = store.get("hand", true);
+let handOn = false;   // always starts off; tap ✋ to move the image
 function setHand(v, announce){
-  handOn = v; store.set("hand", v);
+  handOn = v;
   $("handBtn").setAttribute("aria-pressed", v); stage.classList.toggle("hand", v);
   if(announce) toast(v ? T[lang].handOn : T[lang].handOff);
 }
@@ -1041,7 +1041,6 @@ stage.addEventListener("wheel", e => {
 }, {passive:false});
 $("handBtn").onclick = () => setHand(!handOn, true);
 setHand(handOn, false);
-if(!store.get("handHint", false)){ store.set("handHint", true); setTimeout(()=>{ if(handOn) toast(T[lang].handOn); }, 1500); }
 
 let hiddenAt = 0;
 document.addEventListener("visibilitychange",()=>{
