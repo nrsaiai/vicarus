@@ -54,6 +54,7 @@ button{font:inherit;color:inherit}
 
 /* The photo fills exactly the area iOS lets the page draw (iOS 26.1+ can withhold the status-bar strip). */
 #stage{position:fixed;inset:0;overflow:hidden;background:var(--ink);touch-action:none;cursor:default;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#stageB{position:fixed;inset:0;overflow:hidden;pointer-events:none}
 #stage.hand{cursor:grab}
 #stage.hand.dragging{cursor:grabbing}
 .layer{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;transition:opacity 1.1s ease;pointer-events:none}
@@ -118,6 +119,36 @@ button{font:inherit;color:inherit}
 .tchip[aria-pressed="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
 .tchip[aria-pressed="true"] small{color:var(--ink);opacity:.65}
 
+/* Time machine */
+#tmPanel{position:fixed;top:calc(68px + env(safe-area-inset-top,0px));left:50%;translate:-50% 0;width:min(560px,calc(100% - 32px));
+  background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:14px;
+  padding:10px 12px;display:flex;flex-direction:column;gap:8px;transition:opacity .4s}
+.tmrow{display:flex;align-items:center;gap:10px;min-width:0}
+.tmtitle{font:600 15px var(--display);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;padding:2px;flex:none}
+.seg button{border:0;background:transparent;color:var(--muted);border-radius:999px;padding:5px 11px;font:500 12px var(--body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+#tmClose{width:32px;height:32px}
+.tmdates{align-items:flex-start}
+.tmdates label{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;font:600 10px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--lotus)}
+.tmdates select{font:500 14px var(--body);color:var(--paper);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:7px 8px;width:100%;min-width:0;-webkit-appearance:none;appearance:none}
+.tmdates small{font:400 11px var(--mono);color:var(--muted);letter-spacing:0;text-transform:none;min-height:1em}
+.tmarrow{align-self:center;color:var(--muted);font:400 16px var(--body);padding-top:14px}
+#tmFadeRow{gap:8px;font:400 11px var(--mono);color:var(--muted)}
+#tmFadeRow input{flex:1;accent-color:var(--lotus)}
+.tmmsg{margin:0;font:400 12px/1.45 var(--body);color:var(--muted)}
+.tmmsg.err{color:var(--lotus)}
+#divider{position:fixed;top:0;bottom:0;width:44px;translate:-50% 0;cursor:ew-resize;touch-action:none}
+#divider .dline{position:absolute;left:50%;top:0;bottom:0;width:2px;translate:-50% 0;background:var(--paper);box-shadow:0 0 8px rgba(0,0,0,.5)}
+#divider .dknob{position:absolute;left:50%;top:50%;translate:-50% -50%;width:40px;height:40px;border-radius:50%;border:0;background:var(--paper);color:var(--ink);
+  display:grid;place-items:center;box-shadow:0 2px 10px rgba(0,0,0,.45);cursor:ew-resize}
+#divider .dknob svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.dtag{position:absolute;top:calc(50% + 30px);font:600 11px var(--mono);color:var(--ink);background:var(--paper);border-radius:999px;padding:4px 8px;white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums}
+.dtagL{right:calc(50% + 6px)}
+.dtagR{left:calc(50% + 6px)}
+body.tm #themes{display:none}
+.ic.tool2[aria-pressed="true"]{background:var(--lotus);color:var(--ink)}
+
 /* Brand */
 #brand{position:fixed;top:calc(22px + env(safe-area-inset-top,0px));left:max(28px,env(safe-area-inset-left,0px));
   font:600 13px var(--body);letter-spacing:.02em;display:flex;align-items:baseline;gap:10px;transition:opacity .4s}
@@ -140,7 +171,7 @@ button{font:inherit;color:inherit}
 #attrib{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(6px + env(safe-area-inset-bottom,0px));
   font:400 10px var(--body);color:rgba(242,244,239,.6);pointer-events:none}
 
-body.clean #caption,body.clean #themes,body.clean #rail,body.clean #brand,body.clean #dock,body.clean #scrim,body.clean #topscrim,body.clean .edge{opacity:0;pointer-events:none}
+body.clean #caption,body.clean #themes,body.clean #tmPanel,body.clean #divider,body.clean #rail,body.clean #brand,body.clean #dock,body.clean #scrim,body.clean #topscrim,body.clean .edge{opacity:0;pointer-events:none}
 body.clean #unhide{display:grid}
 #unhide{display:none;position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));
   background:var(--glass);border:1px solid var(--line);border-radius:12px;opacity:.35}
@@ -223,7 +254,7 @@ body.clean #unhide{display:grid}
   #brand{display:none}
   #rail{left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));justify-content:space-between;padding:3px}
   .sep{display:none}
-  #rail .ic{width:32px;height:32px}
+  #rail .ic{width:30px;height:30px}
   #rail .ic svg{width:19px;height:19px}
   #themes{top:calc(64px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));right:0;padding-right:16px}
   #zoom button{width:44px;height:34px}
@@ -236,6 +267,8 @@ body.clean #unhide{display:grid}
 </head>
 <body>
 <div id="stage" aria-label="Satellite view"></div>
+<div id="stageB" hidden></div>
+<div id="divider" hidden><div class="dline"></div><button class="dknob" id="dknob" type="button"><svg viewBox="0 0 24 24"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6"/></svg></button><span class="dtag dtagL" id="dtagL"></span><span class="dtag dtagR" id="dtagR"></span></div>
 <div id="topscrim"></div>
 <div id="scrim"></div>
 <div id="loader">…</div>
@@ -250,6 +283,7 @@ body.clean #unhide{display:grid}
   <span class="sep"></span>
   <button class="ic fav" id="favBtn" data-tip="fav" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
   <a class="ic" id="mapsBtn" data-tip="maps" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg></a>
+  <button class="ic tool2" id="tmBtn" data-tip="tm" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v4h4"/><path d="M12 7v5l3 2"/></svg></button>
   <button class="ic" id="dlBtn" data-tip="dl"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>
   <span class="sep"></span>
   <button class="ic" id="galBtn" data-tip="gal"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
@@ -258,6 +292,17 @@ body.clean #unhide{display:grid}
   <button class="ic" id="hideBtn" data-tip="hide"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><path d="M4 4l16 16"/></svg></button>
 </nav>
 <div id="themes" role="toolbar"></div>
+<section id="tmPanel" hidden aria-labelledby="tmTitle">
+  <div class="tmrow"><strong class="tmtitle" id="tmTitle" data-t="tmTitle"></strong>
+    <div class="seg" role="group"><button id="tmSwipe" type="button" aria-pressed="true" data-t="tmSwipe"></button><button id="tmFade" type="button" aria-pressed="false" data-t="tmFade"></button></div>
+    <button class="ic" id="tmClose" type="button"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="tmrow tmdates" id="tmDates" hidden>
+    <label for="tmBefore"><span data-t="tmBefore"></span><select id="tmBefore"></select><small id="tmBeforeCap"></small></label>
+    <span class="tmarrow">→</span>
+    <label for="tmAfter"><span data-t="tmAfter"></span><select id="tmAfter"></select><small id="tmAfterCap"></small></label></div>
+  <div class="tmrow" id="tmFadeRow" hidden><span id="tmFadeL"></span><input type="range" id="tmFadeRange" min="0" max="100" value="50"><span id="tmFadeR"></span></div>
+  <p class="tmmsg" id="tmMsg" aria-live="polite"></p>
+</section>
 <button class="ic" id="unhide" aria-label="Show"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg></button>
 
 
@@ -280,7 +325,7 @@ body.clean #unhide{display:grid}
   </div>
   <div id="inset"><canvas id="insetCv"></canvas><div id="insetLabel"></div></div>
 </div>
-<div id="attrib">Imagery © Esri, Maxar, Earthstar Geographics · v0.12</div>
+<div id="attrib">Imagery © Esri, Maxar, Earthstar Geographics · v0.13</div>
 
 <div class="panel" id="searchPanel" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
@@ -332,13 +377,17 @@ body.clean #unhide{display:grid}
 "use strict";
 const TILE = (z,y,x) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
 const OSM = "https://nominatim.openstreetmap.org";
-const APP_VERSION = "0.12";
+const APP_VERSION = "0.13";
 const MAXZ = 18;            // deepest imagery level requested; closer views are scaled up
 const LEVELS = 3;           // zoom steps toward the place: 1×, 2×, 4×
 
 const T = {
   vi:{brand:"Việt Nam từ trên cao",prev:"Trước",next:"Tiếp",fav:"Yêu thích",maps:"Mở trong Google Maps",dl:"Lưu hoặc chia sẻ hình nền",
-      gal:"Bộ sưu tập",opts:"Tùy chọn",hide:"Ẩn chữ (H)",hand:"Bàn tay: kéo để di chuyển ảnh (M)",handOn:"Bàn tay bật · kéo để di chuyển ảnh",handOff:"Bàn tay tắt · vuốt sang ngang để đổi địa điểm",search:"Tìm địa điểm",region:"Vùng",theme:"Chủ đề",language:"Ngôn ngữ",
+      gal:"Bộ sưu tập",opts:"Tùy chọn",hide:"Ẩn chữ (H)",tm:"Cỗ máy thời gian (T)",tmTitle:"Cỗ máy thời gian",tmSwipe:"Trượt",tmFade:"Mờ dần",tmBefore:"Trước",tmAfter:"Sau",
+      tmLoading:n=>`Đang dò kho ảnh từ 2014 đến nay… đã thấy ${n} bức ảnh khác nhau`,tmFound:n=>`${n} bức ảnh khác nhau ở nơi này từ 2014 đến nay. Kéo đường chia để so sánh.`,
+      tmFoundFade:n=>`${n} bức ảnh khác nhau ở nơi này từ 2014 đến nay. Kéo thanh trượt để chuyển dần giữa hai ảnh.`,
+      tmNone:"Kho lưu trữ chỉ có một bức ảnh ở nơi này, chưa có gì để so sánh.",tmErr:"Không tải được kho ảnh lịch sử của Esri. Kiểm tra mạng rồi thử lại.",
+      tmCap:d=>`ảnh chụp ${d}`,tmPub:"đăng",tmKnob:"Kéo để so sánh hai thời điểm",hand:"Bàn tay: kéo để di chuyển ảnh (M)",handOn:"Bàn tay bật · kéo để di chuyển ảnh",handOff:"Bàn tay tắt · vuốt sang ngang để đổi địa điểm",search:"Tìm địa điểm",region:"Vùng",theme:"Chủ đề",language:"Ngôn ngữ",
       favs:"Yêu thích",all:"Tất cả",any:"Tất cả",
       R:{N:"Miền Bắc",C:"Miền Trung",S:"Miền Nam"},
       THS:{mtn:"Núi",rice:"Ruộng lúa",sea:"Biển & đảo",water:"Sông nước",city:"Đô thị",heritage:"Di sản"},
@@ -361,7 +410,11 @@ const T = {
       netErr:"Không kết nối được dịch vụ tìm kiếm. Kiểm tra mạng rồi thử lại.",needNet:"Cần có mạng để tìm địa điểm mới.",
       found:"Địa điểm bạn tìm",lat:["B","N"],lon:["Đ","T"]},
   en:{brand:"Vietnam from above",prev:"Previous",next:"Next",fav:"Favorite",maps:"Open in Google Maps",dl:"Save or share wallpaper",
-      gal:"Gallery",opts:"Options",hide:"Hide labels (H)",hand:"Hand tool: drag to move the image (M)",handOn:"Hand tool on · drag to move the image",handOff:"Hand tool off · swipe sideways to change place",search:"Find a place",region:"Region",theme:"Theme",language:"Language",
+      gal:"Gallery",opts:"Options",hide:"Hide labels (H)",tm:"Time machine (T)",tmTitle:"Time machine",tmSwipe:"Swipe",tmFade:"Fade",tmBefore:"Before",tmAfter:"After",
+      tmLoading:n=>`Searching the archive from 2014 to now… ${n} different images so far`,tmFound:n=>`${n} different images of this place since 2014. Drag the divider to compare.`,
+      tmFoundFade:n=>`${n} different images of this place since 2014. Move the slider to fade between them.`,
+      tmNone:"The archive has only one image of this place, so there is nothing to compare yet.",tmErr:"Couldn't load Esri's imagery archive. Check your connection and try again.",
+      tmCap:d=>`captured ${d}`,tmPub:"published",tmKnob:"Drag to compare the two dates",hand:"Hand tool: drag to move the image (M)",handOn:"Hand tool on · drag to move the image",handOff:"Hand tool off · swipe sideways to change place",search:"Find a place",region:"Region",theme:"Theme",language:"Language",
       favs:"Favorites",all:"All places",any:"All",
       R:{N:"North",C:"Central",S:"South"},
       THS:{mtn:"Mountains",rice:"Rice fields",sea:"Coast & islands",water:"Rivers & delta",city:"Cities",heritage:"Heritage"},
@@ -476,9 +529,14 @@ const moved = () => cur && (Math.abs(view.lat-cur.lat) > 1e-6 || Math.abs(view.l
 function render(p, lv, fromLv, fast){
   const {W,H} = fitStage(); const tok = ++renderToken;
   const g = geometry(view, W, H, zFor(p,W,H,lv), Math.min(devicePixelRatio||1, 2), Math.round(Math.min(W,H)*0.5)); lastGeo = {g, W, H};
+  if(tmReady()){ renderInto(stage, g, lv, fromLv, fast, tok, W, H, wbTile(tm.after), true); renderInto($("stageB"), g, lv, fromLv, fast, tok, W, H, wbTile(tm.before), false); }
+  else renderInto(stage, g, lv, fromLv, fast, tok, W, H, TILE, true);
+  return g;
+}
+function renderInto(box, g, lv, fromLv, fast, tok, W, H, tileFn, main){
   // Zoom: push the current picture toward the centre while the sharper one loads.
   if(fromLv && !reduceMotion){
-    for(const old of stage.children){
+    for(const old of box.children){
       const k = Math.pow(2, lv - (+old.dataset.level||lv));
       old.style.transformOrigin = `${W/2}px ${H/2}px`;
       old.style.transition = "transform .9s cubic-bezier(.2,.7,.2,1), opacity 1.1s ease";
@@ -490,11 +548,12 @@ function render(p, lv, fromLv, fast){
   const need = Math.max(1, g.tiles.filter(t=>t.inView).length*0.85);
   let done = 0, shown = false;
   const loader = $("loader");
-  const loaderTimer = setTimeout(()=>{ if(!shown && tok===renderToken) loader.classList.add("on"); }, 600);
+  const loaderTimer = main ? setTimeout(()=>{ if(!shown && tok===renderToken) loader.classList.add("on"); }, 600) : 0;
   const reveal = () => {
-    if(shown || tok!==renderToken) return; shown = true; clearTimeout(loaderTimer); loader.classList.remove("on");
+    if(shown || tok!==renderToken) return; shown = true;
+    if(main){ clearTimeout(loaderTimer); loader.classList.remove("on"); }
     requestAnimationFrame(()=>layer.classList.add("on"));
-    [...stage.children].forEach(c=>{ if(c!==layer) setTimeout(()=>c.remove(), fast ? 400 : 1200); });
+    [...box.children].forEach(c=>{ if(c!==layer) setTimeout(()=>c.remove(), fast ? 400 : 1200); });
   };
   for(const t of g.tiles){
     const img = new Image();
@@ -502,14 +561,150 @@ function render(p, lv, fromLv, fast){
     img.style.cssText = `left:${Math.round(t.l)}px;top:${Math.round(t.t)}px;width:${Math.ceil(g.ts)+1}px;height:${Math.ceil(g.ts)+1}px`;
     const fin = () => { if(t.inView && ++done >= need) reveal(); };
     img.onload = fin;
-    img.onerror = () => { if(img.crossOrigin){ img.removeAttribute("crossorigin"); img.src = TILE(t.z,t.y,t.x)+"?nc"; } else { img.style.visibility="hidden"; fin(); } };
-    img.src = TILE(t.z,t.y,t.x);
+    img.onerror = () => { if(img.crossOrigin){ img.removeAttribute("crossorigin"); img.src = tileFn(t.z,t.y,t.x)+"?nc"; } else { img.style.visibility="hidden"; fin(); } };
+    img.src = tileFn(t.z,t.y,t.x);
     layer.appendChild(img);
   }
-  stage.appendChild(layer);
+  box.appendChild(layer);
   setTimeout(reveal, 3500);
-  return g;
 }
+
+// ── Time machine: Esri World Imagery Wayback (every published version since Feb 2014)
+const WB_CONFIG = "https://s3-us-west-2.amazonaws.com/config.maptiles.arcgis.com/waybackconfig.json";
+const WB_BASE = "https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer";
+let wbItems = null, wbByNum = new Map();
+const tm = {on:false, mode:"swipe", pos:0.5, fade:0.5, before:null, after:null, list:[], seq:0, capCache:new Map()};
+const tmReady = () => tm.on && tm.before && tm.after && tm.before !== tm.after;
+const wbTile = num => { const it = wbByNum.get(num); return (z,y,x) => it.url.replace("{level}",z).replace("{row}",y).replace("{col}",x); };
+async function wbLoadItems(){
+  if(wbItems) return wbItems;
+  const r = await fetch(WB_CONFIG); if(!r.ok) throw new Error("config");
+  const cfg = await r.json();
+  wbItems = Object.keys(cfg).filter(k=>!isNaN(+k)).map(k=>{
+    const it = cfg[k], m = /\d{4}-\d{2}-\d{2}/.exec((it && it.itemTitle) || "");
+    if(!m || !it.itemURL) return null;
+    const [y,mo,d] = m[0].split("-").map(Number);
+    return {num:+k, date:m[0], time:new Date(y,mo-1,d).getTime(), url:it.itemURL, meta:it.metadataLayerUrl||""};
+  }).filter(Boolean).sort((a,b)=>b.time-a.time);
+  wbByNum = new Map(wbItems.map(it=>[it.num,it]));
+  return wbItems;
+}
+// Walk back through the archive one real change at a time (same method as Esri's wayback-core).
+async function wbChanges(lat, lon, lvl, onProgress, seq){
+  const items = await wbLoadItems();
+  const n = Math.pow(2,lvl), col = Math.floor(mx(lon)*n), row = Math.floor(my(lat)*n);
+  const idx = new Map(items.map((it,i)=>[it.num,i]));
+  const found = []; let rel = items[0].num, guard = 0;
+  while(rel && guard++ < 120){
+    if(seq !== tm.seq) return null;
+    const r = await fetch(`${WB_BASE}/tilemap/${rel}/${lvl}/${row}/${col}`); const j = await r.json();
+    if(!j || !j.data || !j.data[0]) break;
+    const sel = j.select && j.select[0] ? +j.select[0] : rel;
+    found.push({num:sel, size:(j.size && j.size[0]) || 0}); onProgress(found.length);
+    const i = idx.get(sel); rel = i!==undefined && items[i+1] ? items[i+1].num : null;
+  }
+  // Neighbouring versions with identical tile size are the same photo: keep the oldest of each run.
+  const uniq = found.filter((f,i) => !(found[i+1] && f.size && found[i+1].size===f.size));
+  return uniq.map(f=>wbByNum.get(f.num)).filter(Boolean);
+}
+async function wbCapture(it, lat, lon, lvl){
+  const key = `${it.num}|${lat.toFixed(3)}|${lon.toFixed(3)}`;
+  if(tm.capCache.has(key)) return tm.capCache.get(key);
+  let out = null;
+  try{
+    if(it.meta){
+      const layerId = Math.min(23-10, 23-lvl);
+      const q = new URLSearchParams({f:"json", where:"1=1", outFields:"SRC_DATE2", returnGeometry:"false",
+        geometry:JSON.stringify({spatialReference:{wkid:4326}, x:lon, y:lat}), geometryType:"esriGeometryPoint", spatialRel:"esriSpatialRelIntersects"});
+      const r = await fetch(`${it.meta}/${layerId}/query?${q}`); const j = await r.json();
+      const v = j && j.features && j.features[0] && j.features[0].attributes && j.features[0].attributes.SRC_DATE2;
+      if(v) out = new Date(v);
+    }
+  }catch(e){}
+  tm.capCache.set(key, out); return out;
+}
+const fmtDay = time => new Date(time).toLocaleDateString(lang==="vi"?"vi-VN":"en-GB", {day:"numeric", month:"short", year:"numeric"});
+const fmtMonth = d => d.toLocaleDateString(lang==="vi"?"vi-VN":"en-GB", {month:"short", year:"numeric"});
+function tmLabel(num){ const it = wbByNum.get(num); if(!it) return ""; const c = tm.capCache.get(tm.capKey && tm.capKey(num)); return c ? fmtMonth(c) : fmtMonth(new Date(it.time)); }
+const tmLevel = () => clamp(Math.round(cur ? cur.z : 14) + 1, 11, 17);
+
+function tmSetMsg(text, err){ const m = $("tmMsg"); m.textContent = text || ""; m.className = "tmmsg" + (err ? " err" : ""); m.hidden = !text; }
+function tmApply(){
+  const B = $("stageB"), dv = $("divider"), ready = tmReady();
+  B.hidden = !ready; dv.hidden = !ready || tm.mode!=="swipe";
+  $("tmFadeRow").hidden = !ready || tm.mode!=="fade";
+  $("tmSwipe").setAttribute("aria-pressed", tm.mode==="swipe"); $("tmFade").setAttribute("aria-pressed", tm.mode==="fade");
+  if(!ready) return;
+  if(tm.mode==="swipe"){ B.style.opacity = 1; B.style.clipPath = `inset(0 ${((1-tm.pos)*100).toFixed(2)}% 0 0)`; dv.style.left = (tm.pos*100).toFixed(2)+"%"; }
+  else { B.style.clipPath = "none"; B.style.opacity = (1-tm.fade).toFixed(3); }
+  $("dtagL").textContent = $("tmFadeL").textContent = tmLabel(tm.before);
+  $("dtagR").textContent = $("tmFadeR").textContent = tmLabel(tm.after);
+  $("dknob").setAttribute("aria-label", T[lang].tmKnob);
+}
+async function tmCaptions(){
+  if(!tmReady() || !cur) return;
+  const lvl = tmLevel(), lat = view.lat, lon = view.lon, t = T[lang];
+  tm.capKey = num => `${num}|${lat.toFixed(3)}|${lon.toFixed(3)}`;
+  for(const [num, el] of [[tm.before,"tmBeforeCap"],[tm.after,"tmAfterCap"]]){
+    const it = wbByNum.get(num); if(!it) continue;
+    const c = await wbCapture(it, lat, lon, lvl);
+    if(num===tm.before || num===tm.after) $(el).textContent = c ? t.tmCap(fmtMonth(c)) : `${t.tmPub} ${fmtDay(it.time)}`;
+  }
+  tmApply();
+}
+function tmFillSelects(){
+  for(const [id, val] of [["tmBefore", tm.before], ["tmAfter", tm.after]]){
+    const sel = $(id); sel.innerHTML = "";
+    for(const it of tm.list){ const o = document.createElement("option"); o.value = it.num; o.textContent = fmtDay(it.time); o.selected = it.num===val; sel.appendChild(o); }
+  }
+  $("tmDates").hidden = tm.list.length < 2;
+}
+async function tmLoad(){
+  if(!tm.on || !cur) return;
+  const seq = ++tm.seq, t = T[lang];
+  tmSetMsg(t.tmLoading(0));
+  let list = null;
+  try{ list = await wbChanges(view.lat, view.lon, tmLevel(), n => { if(seq===tm.seq) tmSetMsg(t.tmLoading(n)); }, seq); }
+  catch(e){ if(seq===tm.seq){ tmSetMsg(t.tmErr, true); tm.list = []; tmFillSelects(); tm.before = tm.after = null; tmApply(); caption(cur, render(cur, level, 0, true)); } return; }
+  if(!list || seq!==tm.seq) return;
+  tm.list = list;
+  if(list.length < 2){ tm.before = tm.after = null; tmFillSelects(); tmSetMsg(t.tmNone); tmApply(); caption(cur, render(cur, level, 0, true)); return; }
+  if(!list.some(i=>i.num===tm.after)) tm.after = list[0].num;
+  if(!list.some(i=>i.num===tm.before) || tm.before===tm.after) tm.before = list[list.length-1].num;
+  tmFillSelects(); tmSetMsg(tm.mode==="fade" ? t.tmFoundFade(list.length) : t.tmFound(list.length));
+  tmApply(); caption(cur, render(cur, level, 0, true)); tmCaptions();
+}
+function tmToggle(on){
+  tm.on = on === undefined ? !tm.on : on;
+  document.body.classList.toggle("tm", tm.on);
+  $("tmPanel").hidden = !tm.on; $("tmBtn").setAttribute("aria-pressed", tm.on);
+  if(!tm.on){ tm.seq++; tm.before = tm.after = null; $("stageB").innerHTML = ""; tmApply(); if(cur) caption(cur, render(cur, level, 0, true)); return; }
+  tm.list = []; $("tmDates").hidden = true; tmApply(); tmLoad();
+}
+$("tmBtn").onclick = () => tmToggle();
+$("tmClose").onclick = () => tmToggle(false);
+$("tmSwipe").onclick = () => { tm.mode = "swipe"; tmApply(); if(tm.list.length>1) tmSetMsg(T[lang].tmFound(tm.list.length)); };
+$("tmFade").onclick = () => { tm.mode = "fade"; tmApply(); if(tm.list.length>1) tmSetMsg(T[lang].tmFoundFade(tm.list.length)); };
+$("tmFadeRange").addEventListener("input", e => { tm.fade = e.target.value/100; tmApply(); });
+for(const [id, key] of [["tmBefore","before"],["tmAfter","after"]]){
+  $(id).addEventListener("change", e => {
+    tm[key] = +e.target.value;
+    if(tm.before===tm.after){ const other = tm.list.find(i=>i.num!==tm[key]); if(other){ if(key==="before") tm.after = other.num; else tm.before = other.num; tmFillSelects(); } }
+    tmApply(); caption(cur, render(cur, level, 0, true)); tmCaptions();
+  });
+}
+// Divider: drag with mouse or finger
+(() => {
+  const dv = $("divider"); let on = false;
+  const setX = x => { tm.pos = clamp(x/innerWidth, 0.02, 0.98); tmApply(); };
+  dv.addEventListener("mousedown", e => { e.preventDefault(); e.stopPropagation(); on = true; });
+  addEventListener("mousemove", e => { if(on) setX(e.clientX); });
+  addEventListener("mouseup", () => { on = false; });
+  dv.addEventListener("touchstart", e => { e.preventDefault(); e.stopPropagation(); on = true; }, {passive:false});
+  dv.addEventListener("touchmove", e => { e.preventDefault(); if(on && e.touches[0]) setX(e.touches[0].clientX); }, {passive:false});
+  dv.addEventListener("touchend", () => { on = false; });
+  dv.addEventListener("keydown", e => { if(e.key==="ArrowLeft"||e.key==="ArrowRight"){ e.preventDefault(); e.stopPropagation(); tm.pos = clamp(tm.pos + (e.key==="ArrowLeft"?-0.05:0.05), 0.02, 0.98); tmApply(); } });
+})();
 
 // ── Caption
 function dms(v, pair){
@@ -553,6 +748,7 @@ function show(p, push=true){
   seen = [p.id, ...seen.filter(x=>x!==p.id)].slice(0,300); store.set("seen", seen);
   try{ history.replaceState(null,"","#"+p.id); }catch(e){}
   caption(p, render(p, level));
+  if(tm.on) tmLoad();
 }
 function setLevel(n){
   n = clamp(n, 1, LEVELS); if(!cur || n===level) return;
@@ -560,7 +756,7 @@ function setLevel(n){
   caption(cur, render(cur, level, from));
 }
 const cycleZoom = () => setLevel(level===LEVELS ? 1 : level+1);
-function recenter(){ if(!cur || !moved()) return; view = {lat:cur.lat, lon:cur.lon}; caption(cur, render(cur, level, 0, true)); }
+function recenter(){ if(!cur || !moved()) return; view = {lat:cur.lat, lon:cur.lon}; caption(cur, render(cur, level, 0, true)); if(tm.on) tmCaptions(); }
 // Move the view by a drag of (dx, dy) screen pixels at the current zoom; stays within reach of Vietnam.
 function panBy(dx, dy){
   if(!cur || !lastGeo) return;
@@ -652,13 +848,44 @@ async function makeImage(sz, withText){
   const g = geometry(view, d.vW, d.vH, zEff, d.scale);
   const cv = document.createElement("canvas"); cv.width = d.pxW; cv.height = d.pxH;
   const c = cv.getContext("2d"); c.scale(d.scale, d.scale); c.fillStyle="#0b1412"; c.fillRect(0,0,d.vW,d.vH);
-  const load = t => new Promise(res=>{ const i=new Image(); i.crossOrigin="anonymous"; i.onload=()=>res(i); i.onerror=()=>res(null); i.src=TILE(t.z,t.y,t.x); });
-  const imgs = await Promise.all(g.tiles.map(load));
-  imgs.forEach((im,k)=>{ if(im){ const t=g.tiles[k]; c.drawImage(im, t.l, t.t, g.ts+0.5, g.ts+0.5); }});
+  const draw = async tileFn => {
+    const load = t => new Promise(res=>{ const i=new Image(); i.crossOrigin="anonymous"; i.onload=()=>res(i); i.onerror=()=>res(null); i.src=tileFn(t.z,t.y,t.x); });
+    const imgs = await Promise.all(g.tiles.map(load));
+    imgs.forEach((im,k)=>{ if(im){ const t=g.tiles[k]; c.drawImage(im, t.l, t.t, g.ts+0.5, g.ts+0.5); }});
+  };
+  if(tmReady()){
+    await draw(wbTile(tm.after));
+    c.save();
+    if(tm.mode==="swipe"){ c.beginPath(); c.rect(0, 0, d.vW*tm.pos, d.vH); c.clip(); } else c.globalAlpha = 1-tm.fade;
+    await draw(wbTile(tm.before));
+    c.restore();
+    drawCompareMarks(c, d.vW, d.vH);
+  } else await draw(TILE);
   if(withText){ if(d.screen) await drawOverlay(c, {W:d.vW, H:d.vH}, d.scale); else await drawOverlayAt(c, d.vW, d.vH, d.scale); }
   let blob = null;
   try{ blob = await new Promise(r=>cv.toBlob(r, "image/jpeg", 0.92)); }catch(e){}
   return blob ? {blob, w:d.pxW, h:d.pxH} : null;
+}
+// Divider line and the two dates, drawn onto a saved comparison
+function drawCompareMarks(c, W, H){
+  const L = tmLabel(tm.before), R = tmLabel(tm.after);
+  c.save();
+  const fs = Math.max(11, Math.round(Math.min(W,H)/34));
+  c.font = `600 ${fs}px "JetBrains Mono", ui-monospace, monospace`;
+  const pill = (text, x, y, alignRight) => {
+    const w = c.measureText(text).width + fs*1.2, h = fs + fs*0.9, x0 = alignRight ? x - w : x;
+    c.fillStyle = "#f2f4ef"; c.beginPath(); if(c.roundRect) c.roundRect(x0, y, w, h, h/2); else c.rect(x0, y, w, h); c.fill();
+    c.fillStyle = "#0b1412"; c.textBaseline = "middle"; c.fillText(text, x0+fs*0.6, y+h/2+1);
+  };
+  const ty = Math.round(H*0.18);
+  if(tm.mode==="swipe"){
+    const x = W*tm.pos;
+    c.fillStyle = "#f2f4ef"; c.shadowColor = "rgba(0,0,0,.5)"; c.shadowBlur = 8; c.fillRect(x-1, 0, 2, H); c.shadowBlur = 0;
+    pill(L, x-8, ty, true); pill(R, x+8, ty, false);
+  } else {
+    pill(`${L} → ${R}`, 16, ty, false);
+  }
+  c.restore();
 }
 let saving = false;
 // Phones and tablets save through the share sheet (that is how an image reaches Photos); computers download the file.
@@ -671,7 +898,8 @@ async function saveSize(sz, btn){
   try{ out = await makeImage(sz, $("withText").checked); }catch(e){}
   saving = false; btn.removeAttribute("aria-busy");
   if(!out){ msg.className = "msg err"; msg.textContent = t.dlFail; return; }
-  const fname = `vicarus-${slug(nameOf(cur))||"view"}-${out.w}x${out.h}.jpg`;
+  const span = tmReady() ? `-${wbByNum.get(tm.before).date.slice(0,4)}-vs-${wbByNum.get(tm.after).date.slice(0,4)}` : "";
+  const fname = `vicarus-${slug(nameOf(cur))||"view"}${span}-${out.w}x${out.h}.jpg`;
   const file = new File([out.blob], fname, {type:"image/jpeg"});
   if(mobileShare() && navigator.canShare && navigator.canShare({files:[file]})){
     const share = async () => {
@@ -955,6 +1183,7 @@ function closePanels(silent){
 
 // ── Language
 function applyLang(){
+  if(tm.on && tm.list.length){ tmFillSelects(); setTimeout(tmCaptions, 0); }
   const t=T[lang]; document.documentElement.lang = lang;
   document.querySelectorAll("[data-t]").forEach(el=>{ el.textContent = t[el.dataset.t]; });
   document.querySelectorAll("[data-tip]").forEach(el=>{ const s=t[el.dataset.tip]; el.title=s; el.setAttribute("aria-label",s); });
@@ -1000,6 +1229,7 @@ addEventListener("keydown",e=>{
   else if(k==="1"||k==="2"||k==="3") setLevel(+k);
   else if(k==="c") recenter();
   else if(k==="m") setHand(!handOn, true);
+  else if(k==="t") tmToggle();
 });
 let rT; addEventListener("resize",()=>{ clearTimeout(rT); rT=setTimeout(()=>{ if(cur) caption(cur, render(cur, level)); },250); });
 
@@ -1014,7 +1244,7 @@ function setHand(v, announce){
   if(announce) toast(v ? T[lang].handOn : T[lang].handOff);
 }
 let drag = null, pinch = null, lastTap = 0, wheelAt = 0;
-const layersMove = (dx, dy) => { for(const l of stage.children){ l.style.transition = "none"; l.style.transform = `translate(${dx}px,${dy}px)`; } };
+const layersMove = (dx, dy) => { for(const l of [...stage.children, ...$("stageB").children]){ l.style.transition = "none"; l.style.transform = `translate(${dx}px,${dy}px)`; } };
 function dragStart(x, y, touch){ drag = {x0:x, y0:y, dx:0, dy:0, on:false, t:Date.now(), touch}; }
 function dragMove(x, y){
   if(!drag) return;
