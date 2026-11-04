@@ -1,0 +1,19 @@
+{
+  "name": "Vicarus · Việt Nam từ trên cao",
+  "short_name": "Vicarus",
+  "description": "Mỗi lần mở là một góc Việt Nam nhìn từ vệ tinh. A new aerial view of Vietnam every time you open it.",
+  "lang": "vi",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1412",
+  "theme_color": "#0b1412",
+  "categories": ["travel", "photo", "education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

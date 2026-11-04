@@ -1,0 +1,1316 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Vicarus</title>
+<meta name="description" content="Mỗi lần mở là một góc Việt Nam nhìn từ vệ tinh. A new aerial view of Vietnam every time you open it.">
+<meta name="theme-color" content="#0b1412">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vicarus">
+<meta name="format-detection" content="telephone=no">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/splash-1320x2868.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/splash-1290x2796.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/splash-1284x2778.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/splash-1260x2736.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/splash-1242x2688.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="splash/splash-828x1792.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/splash-1206x2622.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/splash-1179x2556.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/splash-1170x2532.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/splash-1125x2436.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="splash/splash-750x1334.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Be+Vietnam+Pro:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap&subset=vietnamese">
+<style>
+/* Layout: full-bleed satellite frame sized to the physical screen; caption bottom-left like a map legend,
+   tool rail top, zoom ladder on the right edge, a dot-map of every place as the inset. Single dark look over imagery. */
+:root{
+  --ink:#0b1412;          /* deep paddy-water black */
+  --paper:#f2f4ef;        /* caption text */
+  --muted:#b9c4bd;        /* secondary text */
+  --lotus:#e9a6b4;        /* accent: sen hồng */
+  --jade:#7fc8a9;         /* inset dots */
+  --field:#16241f;        /* inputs */
+  --glass:rgba(11,20,18,.55);
+  --line:rgba(242,244,239,.18);
+  --display:"Fraunces", "Iowan Old Style", Georgia, serif;
+  --body:"Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--ink);color:var(--paper);font-family:var(--body);overflow:hidden;
+  overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--lotus);outline-offset:2px}
+
+/* The photo fills exactly the area iOS lets the page draw (iOS 26.1+ can withhold the status-bar strip). */
+#stage{position:fixed;inset:0;overflow:hidden;background:var(--ink);touch-action:none;cursor:default;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#stageB{position:fixed;inset:0;overflow:hidden;pointer-events:none}
+#stage.hand{cursor:grab}
+#stage.hand.dragging{cursor:grabbing}
+.layer{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;transition:opacity 1.1s ease;pointer-events:none}
+.layer.on{opacity:1}
+.layer img{position:absolute;display:block;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;max-width:none}
+#scrim{position:fixed;left:0;right:0;bottom:0;height:min(55vh,460px);pointer-events:none;
+  background:linear-gradient(to top,rgba(5,10,9,.82),rgba(5,10,9,.35) 45%,transparent)}
+#topscrim{position:fixed;inset:0 0 auto 0;height:calc(120px + env(safe-area-inset-top,0px));pointer-events:none;
+  background:linear-gradient(to bottom,rgba(5,10,9,.5),transparent)}
+
+#loader{position:fixed;left:50%;top:50%;translate:-50% -50%;font:500 12px var(--mono);letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);opacity:0;transition:opacity .3s;pointer-events:none}
+#loader.on{opacity:1}
+
+/* Caption */
+#caption{position:fixed;left:0;bottom:0;max-width:min(680px,calc(100% - 250px));
+  padding:0 16px calc(28px + env(safe-area-inset-bottom,0px)) max(28px,env(safe-area-inset-left,0px));
+  display:flex;flex-direction:column;gap:10px;transition:opacity .4s}
+.eyebrow{font:600 11px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--lotus);display:flex;gap:10px;flex-wrap:wrap}
+.eyebrow span:empty{display:none}
+.eyebrow .dot{color:var(--muted)}
+#name{font:600 clamp(30px,5.2vw,64px)/1.02 var(--display);font-variation-settings:"opsz" 144;margin:0;text-wrap:balance;
+  text-shadow:0 2px 24px rgba(0,0,0,.45);overflow-wrap:anywhere}
+#alt{font:400 clamp(15px,1.5vw,18px)/1.35 var(--body);color:var(--muted);margin:0}
+#alt:empty{display:none}
+.meta{display:flex;flex-wrap:wrap;gap:6px 18px;font:400 12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums;margin-top:4px}
+.meta b{font-weight:500;color:var(--paper)}
+
+/* Tool rail */
+#rail{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;gap:2px;padding:4px;border-radius:14px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--line);transition:opacity .4s}
+.ic{width:40px;height:40px;display:grid;place-items:center;border:0;background:transparent;border-radius:10px;cursor:pointer;color:var(--paper);flex:none}
+.ic:hover{background:rgba(242,244,239,.12)}
+.ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ic.fav[aria-pressed="true"]{color:var(--lotus)}
+.ic.tool[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+.ic.fav[aria-pressed="true"] svg{fill:var(--lotus)}
+.sep{width:1px;margin:8px 3px;background:var(--line);flex:none}
+
+/* Zoom ladder: three steps toward the place, labelled by how wide the frame is */
+#dock{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));
+  display:flex;align-items:flex-end;gap:12px;transition:opacity .4s}
+#zoom{display:flex;flex-direction:column;gap:2px;padding:4px;border-radius:14px;background:var(--glass);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
+#zoom button{width:56px;height:40px;border:0;border-radius:10px;background:transparent;color:var(--muted);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font:400 10px/1 var(--mono);font-variant-numeric:tabular-nums}
+#zoom button b{font:600 14px/1 var(--mono);color:var(--paper)}
+#zoom button:hover{background:rgba(242,244,239,.12)}
+#zoom .zc svg{width:20px;height:20px;fill:none;stroke:var(--lotus);stroke-width:1.7;stroke-linecap:round}
+#zoom button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+#zoom button[aria-pressed="true"] b{color:var(--ink)}
+
+/* Theme chips: the place categories, always on screen */
+#themes{position:fixed;top:calc(70px + env(safe-area-inset-top,0px));left:max(28px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;transition:opacity .4s;padding:2px 0}
+#themes::-webkit-scrollbar{display:none}
+.tchip{flex:none;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  color:var(--paper);border-radius:999px;padding:7px 12px;font:500 12px/1 var(--body);cursor:pointer;display:flex;gap:6px;align-items:baseline;white-space:nowrap}
+.tchip small{font:400 10px/1 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.tchip:hover{border-color:rgba(242,244,239,.4)}
+.tchip[aria-pressed="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.tchip[aria-pressed="true"] small{color:var(--ink);opacity:.65}
+
+/* Time machine */
+#tmPanel{position:fixed;top:calc(68px + env(safe-area-inset-top,0px));left:50%;translate:-50% 0;width:min(560px,calc(100% - 32px));
+  background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:14px;
+  padding:10px 12px;display:flex;flex-direction:column;gap:8px;transition:opacity .4s}
+.tmrow{display:flex;align-items:center;gap:10px;min-width:0}
+.tmtitle{font:600 15px var(--display);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;padding:2px;flex:none}
+.seg button{border:0;background:transparent;color:var(--muted);border-radius:999px;padding:5px 11px;font:500 12px var(--body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--paper);color:var(--ink)}
+#tmClose{width:32px;height:32px}
+.tmdates{align-items:flex-start}
+.tmdates label{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;font:600 10px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--lotus)}
+.tmdates select{font:500 14px var(--body);color:var(--paper);background:var(--field);border:1px solid var(--line);border-radius:10px;padding:7px 8px;width:100%;min-width:0;-webkit-appearance:none;appearance:none}
+.tmdates small{font:400 11px var(--mono);color:var(--muted);letter-spacing:0;text-transform:none;min-height:1em}
+.tmarrow{align-self:center;color:var(--muted);font:400 16px var(--body);padding-top:14px}
+#tmFadeRow{gap:8px;font:400 11px var(--mono);color:var(--muted)}
+#tmFadeRow input{flex:1;accent-color:var(--lotus)}
+.tmmsg{margin:0;font:400 12px/1.45 var(--body);color:var(--muted)}
+.tmmsg.err{color:var(--lotus)}
+#divider{position:fixed;top:0;bottom:0;width:44px;translate:-50% 0;cursor:ew-resize;touch-action:none}
+#divider .dline{position:absolute;left:50%;top:0;bottom:0;width:2px;translate:-50% 0;background:var(--paper);box-shadow:0 0 8px rgba(0,0,0,.5)}
+#divider .dknob{position:absolute;left:50%;top:50%;translate:-50% -50%;width:40px;height:40px;border-radius:50%;border:0;background:var(--paper);color:var(--ink);
+  display:grid;place-items:center;box-shadow:0 2px 10px rgba(0,0,0,.45);cursor:ew-resize}
+#divider .dknob svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.dtag{position:absolute;top:calc(50% + 30px);font:600 11px var(--mono);color:var(--ink);background:var(--paper);border-radius:999px;padding:4px 8px;white-space:nowrap;pointer-events:none;font-variant-numeric:tabular-nums}
+.dtagL{right:calc(50% + 6px)}
+.dtagR{left:calc(50% + 6px)}
+body.tm #themes{display:none}
+.ic.tool2[aria-pressed="true"]{background:var(--lotus);color:var(--ink)}
+
+/* Brand */
+#brand{position:fixed;top:calc(22px + env(safe-area-inset-top,0px));left:max(28px,env(safe-area-inset-left,0px));
+  font:600 13px var(--body);letter-spacing:.02em;display:flex;align-items:baseline;gap:10px;transition:opacity .4s}
+#brand i{font:italic 400 18px var(--display);letter-spacing:0}
+#count{font:400 11px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* Next arrows on edges */
+.edge{position:fixed;top:50%;translate:0 -50%;width:48px;height:88px;border:0;background:transparent;cursor:pointer;
+  color:var(--paper);opacity:0;transition:opacity .25s;display:grid;place-items:center}
+.edge svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.6;filter:drop-shadow(0 1px 6px rgba(0,0,0,.6))}
+#stage:hover~.edge,.edge:hover,.edge:focus-visible{opacity:.9}
+#prevEdge{left:max(8px,env(safe-area-inset-left,0px))}
+#nextEdge{right:max(8px,env(safe-area-inset-right,0px))}
+
+/* Dot-map inset */
+#inset{position:relative;width:150px;height:170px;pointer-events:none;flex:none}
+#inset canvas{width:100%;height:100%;display:block}
+#insetLabel{position:absolute;left:0;bottom:-2px;font:400 10px var(--mono);color:var(--muted);letter-spacing:.06em}
+
+#attrib{position:fixed;right:max(24px,env(safe-area-inset-right,0px));bottom:calc(6px + env(safe-area-inset-bottom,0px));
+  font:400 10px var(--body);color:rgba(242,244,239,.6);pointer-events:none}
+
+body.clean #caption,body.clean #themes,body.clean #tmPanel,body.clean #divider,body.clean #rail,body.clean #brand,body.clean #dock,body.clean #scrim,body.clean #topscrim,body.clean .edge{opacity:0;pointer-events:none}
+body.clean #unhide{display:grid}
+#unhide{display:none;position:fixed;top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));
+  background:var(--glass);border:1px solid var(--line);border-radius:12px;opacity:.35}
+#unhide:hover{opacity:1}
+
+/* Panels */
+.panel{position:fixed;inset:0;display:flex;justify-content:flex-end;background:rgba(3,8,7,.45)}
+.sheet{width:min(560px,100%);height:100%;background:#0f1a17;border-left:1px solid var(--line);display:flex;flex-direction:column;
+  padding:calc(18px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
+.sheet header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.sheet h2{font:600 26px var(--display);margin:0}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font:500 13px var(--body);cursor:pointer;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-content:start;padding-bottom:8px;min-height:0}
+.card{border:0;padding:0;background:transparent;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0}
+.th{background:#1b2925 center/cover no-repeat}
+.card .th{aspect-ratio:4/3;border-radius:8px;max-width:100%;width:100%;display:block;object-fit:cover}
+.gcats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:-4px 0 14px;padding:2px 0;flex:none}
+.gcats::-webkit-scrollbar{display:none}
+.gcats .chip{flex:none;display:flex;gap:6px;align-items:baseline;white-space:nowrap}
+.gcats .chip small{font:400 10px/1 var(--mono);opacity:.7;font-variant-numeric:tabular-nums}
+.card:hover .th{outline:2px solid var(--lotus);outline-offset:2px}
+.card strong{font:500 13px/1.25 var(--body);overflow-wrap:anywhere}
+.card small{font:400 11px var(--mono);color:var(--muted)}
+.empty{grid-column:1/-1;color:var(--muted);font-size:14px;line-height:1.55;padding:24px 0}
+.group{margin-bottom:18px}
+.group h3,.results h3{font:600 11px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.note{font-size:13px;color:var(--muted);line-height:1.55;margin:auto 0 0}
+
+/* Save sizes */
+.sizes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:auto;min-height:0;padding:2px}
+.size{display:flex;align-items:center;gap:12px;text-align:left;border:1px solid var(--line);background:transparent;border-radius:12px;padding:10px;cursor:pointer;color:var(--paper);min-width:0}
+.size:hover,.size:focus-visible{border-color:var(--lotus)}
+.size[aria-busy="true"]{border-color:var(--lotus);background:rgba(233,166,180,.08)}
+.size .frame{flex:none;width:40px;height:40px;display:grid;place-items:center}
+.size .frame i{display:block;border:1.5px solid var(--jade);border-radius:3px;background:rgba(127,200,169,.12)}
+.size span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.size strong{font:500 13px/1.25 var(--body)}
+.size small{font:400 11px/1.2 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.toggle{display:flex;align-items:center;gap:10px;margin:16px 0 4px;font:500 14px var(--body);cursor:pointer}
+.toggle input{width:20px;height:20px;accent-color:var(--lotus);margin:0}
+.savebar{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:12px}
+.savebar .go{height:46px}
+
+/* Search */
+.sform{display:flex;gap:8px}
+.sform input{flex:1;min-width:0;font:400 16px var(--body);color:var(--paper);background:var(--field);border:1px solid var(--line);
+  border-radius:12px;padding:12px 14px;-webkit-appearance:none;appearance:none}
+.sform input::placeholder{color:#7f8f88}
+.go{border:0;border-radius:12px;padding:0 16px;background:var(--lotus);color:var(--ink);font:600 14px var(--body);cursor:pointer;white-space:nowrap}
+.go:disabled{opacity:.6;cursor:default}
+.hint{font-size:13px;color:var(--muted);line-height:1.5;margin:10px 0 16px}
+.results{flex:1;overflow:auto;display:flex;flex-direction:column;gap:2px;min-height:0;padding-bottom:8px}
+.results h3{margin:14px 0 6px}
+.results h3:first-child{margin-top:0}
+.res{display:flex;gap:12px;align-items:center;text-align:left;border:0;background:transparent;padding:8px;border-radius:10px;cursor:pointer;color:var(--paper);width:100%}
+.res:hover,.res:focus-visible{background:rgba(242,244,239,.08)}
+.res .th{width:52px;height:52px;border-radius:8px;flex:none}
+.res span{min-width:0;display:flex;flex-direction:column;gap:3px}
+.res strong{font:500 14px/1.3 var(--body);overflow-wrap:anywhere}
+.res small{font:400 12px/1.35 var(--body);color:var(--muted);overflow-wrap:anywhere}
+.msg{color:var(--muted);font-size:14px;line-height:1.55;padding:6px 8px;margin:0}
+.msg.err{color:var(--lotus)}
+
+.toast{position:fixed;left:50%;top:calc(116px + env(safe-area-inset-top,0px));translate:-50% 0;background:var(--paper);color:var(--ink);
+  padding:9px 16px;border-radius:999px;font:500 13px var(--body);opacity:0;transition:opacity .25s;pointer-events:none;
+  display:flex;gap:12px;align-items:center;max-width:calc(100% - 32px)}
+.toast.on{opacity:1}
+.toast.act{pointer-events:auto}
+.toast button{border:0;background:var(--ink);color:var(--paper);border-radius:999px;padding:6px 12px;font:600 13px var(--body);cursor:pointer;white-space:nowrap}
+#offline{position:fixed;left:max(18px,env(safe-area-inset-left,0px));top:calc(112px + env(safe-area-inset-top,0px));white-space:nowrap;
+  font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--paper);background:var(--glass);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+
+@media (max-width:640px){
+  #dock{right:max(14px,env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));gap:8px}
+  #inset{width:80px;height:96px}
+  #insetLabel{display:none}
+  #brand{display:none}
+  #rail{left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));justify-content:space-between;padding:3px}
+  .sep{display:none}
+  #rail .ic{width:30px;height:30px}
+  #rail .ic svg{width:19px;height:19px}
+  #themes{top:calc(64px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));right:0;padding-right:16px}
+  #zoom button{width:44px;height:34px}
+  #name{font-size:28px}
+  #caption{max-width:100%;padding-left:max(18px,env(safe-area-inset-left,0px));padding-right:160px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
+  .edge{display:none}
+}
+@media (prefers-reduced-motion:reduce){.layer{transition:none}}
+</style>
+</head>
+<body>
+<div id="stage" aria-label="Satellite view"></div>
+<div id="stageB" hidden></div>
+<div id="divider" hidden><div class="dline"></div><button class="dknob" id="dknob" type="button"><svg viewBox="0 0 24 24"><path d="M9 6l-6 6 6 6M15 6l6 6-6 6"/></svg></button><span class="dtag dtagL" id="dtagL"></span><span class="dtag dtagR" id="dtagR"></span></div>
+<div id="topscrim"></div>
+<div id="scrim"></div>
+<div id="loader">…</div>
+
+<div id="brand"><i>Vicarus</i><span data-t="brand"></span><span id="count"></span></div>
+
+<nav id="rail" aria-label="Tools">
+  <button class="ic" id="searchBtn" data-tip="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+  <span class="sep"></span>
+  <button class="ic" id="prevBtn" data-tip="prev"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="ic" id="nextBtn" data-tip="next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  <span class="sep"></span>
+  <button class="ic fav" id="favBtn" data-tip="fav" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button>
+  <a class="ic" id="mapsBtn" data-tip="maps" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M12 21s-6-5.3-6-11a6 6 0 0 1 12 0c0 5.7-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg></a>
+  <button class="ic tool2" id="tmBtn" data-tip="tm" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v4h4"/><path d="M12 7v5l3 2"/></svg></button>
+  <button class="ic" id="dlBtn" data-tip="dl"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>
+  <span class="sep"></span>
+  <button class="ic" id="galBtn" data-tip="gal"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
+  <button class="ic" id="filtBtn" data-tip="opts"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
+  <button class="ic tool" id="handBtn" data-tip="hand" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></button>
+  <button class="ic" id="hideBtn" data-tip="hide"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><path d="M4 4l16 16"/></svg></button>
+</nav>
+<div id="themes" role="toolbar"></div>
+<section id="tmPanel" hidden aria-labelledby="tmTitle">
+  <div class="tmrow"><strong class="tmtitle" id="tmTitle" data-t="tmTitle"></strong>
+    <div class="seg" role="group"><button id="tmSwipe" type="button" aria-pressed="true" data-t="tmSwipe"></button><button id="tmFade" type="button" aria-pressed="false" data-t="tmFade"></button></div>
+    <button class="ic" id="tmClose" type="button"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="tmrow tmdates" id="tmDates" hidden>
+    <label for="tmBefore"><span data-t="tmBefore"></span><select id="tmBefore"></select><small id="tmBeforeCap"></small></label>
+    <span class="tmarrow">→</span>
+    <label for="tmAfter"><span data-t="tmAfter"></span><select id="tmAfter"></select><small id="tmAfterCap"></small></label></div>
+  <div class="tmrow" id="tmFadeRow" hidden><span id="tmFadeL"></span><input type="range" id="tmFadeRange" min="0" max="100" value="50"><span id="tmFadeR"></span></div>
+  <p class="tmmsg" id="tmMsg" aria-live="polite"></p>
+</section>
+<button class="ic" id="unhide" aria-label="Show"><svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.5"/></svg></button>
+
+
+<button class="edge" id="prevEdge" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+<button class="edge" id="nextEdge" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+
+<section id="caption" aria-live="polite">
+  <div class="eyebrow"><span id="region"></span><span class="dot" id="dot">·</span><span id="province"></span></div>
+  <h1 id="name"></h1>
+  <p id="alt"></p>
+  <div class="meta"><span id="coord"></span></div>
+</section>
+
+<div id="dock">
+  <div id="zoom" role="group">
+    <button id="zc" class="zc" type="button" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></button>
+    <button id="z3" data-level="3" aria-pressed="false"><b>3×</b></button>
+    <button id="z2" data-level="2" aria-pressed="false"><b>2×</b></button>
+    <button id="z1" data-level="1" aria-pressed="true"><b>1×</b></button>
+  </div>
+  <div id="inset"><canvas id="insetCv"></canvas><div id="insetLabel"></div></div>
+</div>
+<div id="attrib">Imagery © Esri, Maxar, Earthstar Geographics · v0.13</div>
+
+<div class="panel" id="searchPanel" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+    <header><h2 id="searchTitle" data-t="search"></h2><button class="ic" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <form class="sform" id="searchForm" autocomplete="off">
+      <input id="q" type="search" enterkeyhint="search" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button class="go" id="qGo" type="submit" data-t="searchGo"></button>
+    </form>
+    <p class="hint" data-t="searchHint"></p>
+    <div class="results" id="results"></div>
+    <p class="note">© OpenStreetMap contributors · Nominatim</p>
+  </div>
+</div>
+
+<div class="panel" id="savePanel" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="saveTitle">
+    <header><h2 id="saveTitle" data-t="saveTitle"></h2><button class="ic" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <p class="hint" data-t="saveHint"></p>
+    <div class="sizes" id="sizes"></div>
+    <label class="toggle" for="withText"><input type="checkbox" id="withText"><span data-t="withText"></span></label>
+    <div class="savebar"><p class="msg" id="saveMsg" aria-live="polite"></p><button class="go" id="saveGo" type="button" hidden></button></div>
+  </div>
+</div>
+
+<div class="panel" id="galPanel" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="galTitle">
+    <header><h2 id="galTitle" data-t="gal"></h2><button class="ic" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <div class="tabs"><button class="chip" id="tabFav" aria-pressed="true"></button><button class="chip" id="tabAll" aria-pressed="false"></button></div>
+    <div class="gcats" id="galCats" role="toolbar"></div>
+    <div class="grid" id="galGrid"></div>
+  </div>
+</div>
+
+<div class="panel" id="filtPanel" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="filtTitle">
+    <header><h2 id="filtTitle" data-t="opts"></h2><button class="ic" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+    <div class="group"><h3 data-t="language"></h3><div class="chips" id="langChips"></div></div>
+    <div class="group"><h3 data-t="region"></h3><div class="chips" id="regionChips"></div></div>
+    <p class="note" id="filtNote"></p>
+    <p class="note" id="ver"></p>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<div id="offline" hidden></div>
+
+<script src="places.js"></script>
+<script>
+(() => {
+"use strict";
+const TILE = (z,y,x) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
+const OSM = "https://nominatim.openstreetmap.org";
+const APP_VERSION = "0.13";
+const MAXZ = 18;            // deepest imagery level requested; closer views are scaled up
+const LEVELS = 3;           // zoom steps toward the place: 1×, 2×, 4×
+
+const T = {
+  vi:{brand:"Việt Nam từ trên cao",prev:"Trước",next:"Tiếp",fav:"Yêu thích",maps:"Mở trong Google Maps",dl:"Lưu hoặc chia sẻ hình nền",
+      gal:"Bộ sưu tập",opts:"Tùy chọn",hide:"Ẩn chữ (H)",tm:"Cỗ máy thời gian (T)",tmTitle:"Cỗ máy thời gian",tmSwipe:"Trượt",tmFade:"Mờ dần",tmBefore:"Trước",tmAfter:"Sau",
+      tmLoading:n=>`Đang dò kho ảnh từ 2014 đến nay… đã thấy ${n} bức ảnh khác nhau`,tmFound:n=>`${n} bức ảnh khác nhau ở nơi này từ 2014 đến nay. Kéo đường chia để so sánh.`,
+      tmFoundFade:n=>`${n} bức ảnh khác nhau ở nơi này từ 2014 đến nay. Kéo thanh trượt để chuyển dần giữa hai ảnh.`,
+      tmNone:"Kho lưu trữ chỉ có một bức ảnh ở nơi này, chưa có gì để so sánh.",tmErr:"Không tải được kho ảnh lịch sử của Esri. Kiểm tra mạng rồi thử lại.",
+      tmCap:d=>`ảnh chụp ${d}`,tmPub:"đăng",tmKnob:"Kéo để so sánh hai thời điểm",hand:"Bàn tay: kéo để di chuyển ảnh (M)",handOn:"Bàn tay bật · kéo để di chuyển ảnh",handOff:"Bàn tay tắt · vuốt sang ngang để đổi địa điểm",search:"Tìm địa điểm",region:"Vùng",theme:"Chủ đề",language:"Ngôn ngữ",
+      favs:"Yêu thích",all:"Tất cả",any:"Tất cả",
+      R:{N:"Miền Bắc",C:"Miền Trung",S:"Miền Nam"},
+      THS:{mtn:"Núi",rice:"Ruộng lúa",sea:"Biển & đảo",water:"Sông nước",city:"Đô thị",heritage:"Di sản"},
+      TH:{mtn:"Núi, núi đá & hang động",rice:"Ruộng lúa & ruộng bậc thang",sea:"Biển & đảo",water:"Sông, hồ & châu thổ",city:"Đô thị",heritage:"Di sản"},
+      span:"khung rộng ≈",km:"km",zoom:n=>`Mức zoom ${n}`,recenter:"Về lại địa điểm",
+      empty:"Chưa có địa điểm yêu thích. Bấm ♡ khi gặp một khung cảnh bạn thích.",
+      note:n=>`${n} địa điểm khớp bộ lọc. Mỗi lần mở app sẽ chọn ngẫu nhiên một địa điểm.`,
+      saved:"Đã lưu hình nền",added:"Đã thêm vào yêu thích",removed:"Đã bỏ khỏi yêu thích",
+      dlFail:"Không lưu được: máy chủ ảnh chặn xuất hình. Hãy chụp màn hình thay thế.",loading:"Đang tải ảnh vệ tinh",
+      ready:"Ảnh đã sẵn sàng",saveBtn:"Lưu ảnh",
+      saveTitle:"Lưu hình nền",saveHint:"Chọn kích thước. Ảnh giữ đúng khung cảnh và thiết kế của Vicarus.",withText:"Kèm tên và bản đồ",
+      making:(w,h)=>`Đang tạo ảnh ${w} × ${h}…`,readyFor:(w,h)=>`Ảnh ${w} × ${h} đã sẵn sàng.`,savedFor:(w,h)=>`Đã lưu ảnh ${w} × ${h}.`,
+      SZ:{screen:"Màn hình này",phone:"Điện thoại",tablet:"Máy tính bảng",desk:"Máy tính 4K",laptop:"Laptop",sq:"Instagram vuông",port:"Instagram dọc",story:"Story / Reels"},offline:"Ngoại tuyến · nơi đã xem",
+      searchGo:"Tìm",searchPh:"Tên địa điểm hoặc link Google Maps",
+      searchHint:"Gõ tên một nơi ở Việt Nam rồi nhấn Tìm. Bạn cũng có thể dán link Google Maps hoặc tọa độ, ví dụ 21.0285, 105.8542.",
+      inList:"Có sẵn trong Vicarus",onMap:"Từ bản đồ",searching:"Đang tìm…",
+      noResult:"Không tìm thấy nơi này ở Việt Nam. Thử tên khác, hoặc dán link Google Maps.",
+      outside:"Vị trí này nằm ngoài Việt Nam. Vicarus chỉ hiển thị Việt Nam.",
+      shortLink:"Link rút gọn (maps.app.goo.gl) không đọc được. Hãy mở link trong trình duyệt, rồi chép địa chỉ đầy đủ trên thanh địa chỉ và dán vào đây.",
+      netErr:"Không kết nối được dịch vụ tìm kiếm. Kiểm tra mạng rồi thử lại.",needNet:"Cần có mạng để tìm địa điểm mới.",
+      found:"Địa điểm bạn tìm",lat:["B","N"],lon:["Đ","T"]},
+  en:{brand:"Vietnam from above",prev:"Previous",next:"Next",fav:"Favorite",maps:"Open in Google Maps",dl:"Save or share wallpaper",
+      gal:"Gallery",opts:"Options",hide:"Hide labels (H)",tm:"Time machine (T)",tmTitle:"Time machine",tmSwipe:"Swipe",tmFade:"Fade",tmBefore:"Before",tmAfter:"After",
+      tmLoading:n=>`Searching the archive from 2014 to now… ${n} different images so far`,tmFound:n=>`${n} different images of this place since 2014. Drag the divider to compare.`,
+      tmFoundFade:n=>`${n} different images of this place since 2014. Move the slider to fade between them.`,
+      tmNone:"The archive has only one image of this place, so there is nothing to compare yet.",tmErr:"Couldn't load Esri's imagery archive. Check your connection and try again.",
+      tmCap:d=>`captured ${d}`,tmPub:"published",tmKnob:"Drag to compare the two dates",hand:"Hand tool: drag to move the image (M)",handOn:"Hand tool on · drag to move the image",handOff:"Hand tool off · swipe sideways to change place",search:"Find a place",region:"Region",theme:"Theme",language:"Language",
+      favs:"Favorites",all:"All places",any:"All",
+      R:{N:"North",C:"Central",S:"South"},
+      THS:{mtn:"Mountains",rice:"Rice fields",sea:"Coast & islands",water:"Rivers & delta",city:"Cities",heritage:"Heritage"},
+      TH:{mtn:"Mountains, limestone & caves",rice:"Rice fields & terraces",sea:"Coast & islands",water:"Rivers, lakes & delta",city:"Cities",heritage:"Heritage"},
+      span:"frame ≈",km:"km wide",zoom:n=>`Zoom level ${n}`,recenter:"Back to the place",
+      empty:"No favorites yet. Tap ♡ when you find a view you like.",
+      note:n=>`${n} places match. Each time you open the app, one is picked at random.`,
+      saved:"Wallpaper saved",added:"Added to favorites",removed:"Removed from favorites",
+      dlFail:"Couldn't save: the imagery server blocked the export. Take a screenshot instead.",loading:"Loading satellite imagery",
+      ready:"Image ready",saveBtn:"Save image",
+      saveTitle:"Save wallpaper",saveHint:"Pick a size. The image keeps this view and the Vicarus design.",withText:"Include name and map",
+      making:(w,h)=>`Making ${w} × ${h} image…`,readyFor:(w,h)=>`${w} × ${h} image is ready.`,savedFor:(w,h)=>`Saved ${w} × ${h} image.`,
+      SZ:{screen:"This screen",phone:"Phone",tablet:"Tablet",desk:"Desktop 4K",laptop:"Laptop",sq:"Instagram square",port:"Instagram portrait",story:"Story / Reels"},offline:"Offline · seen places",
+      searchGo:"Search",searchPh:"Place name or Google Maps link",
+      searchHint:"Type the name of a place in Vietnam and tap Search. You can also paste a Google Maps link or coordinates such as 21.0285, 105.8542.",
+      inList:"Already in Vicarus",onMap:"From the map",searching:"Searching…",
+      noResult:"No place in Vietnam matches that. Try another name, or paste a Google Maps link.",
+      outside:"That location is outside Vietnam. Vicarus only shows Vietnam.",
+      shortLink:"Short links (maps.app.goo.gl) can't be read. Open the link in your browser, then copy the full address from the address bar and paste it here.",
+      netErr:"Couldn't reach the search service. Check your connection and try again.",needNet:"You need a connection to find new places.",
+      found:"Your search",lat:["N","S"],lon:["E","W"]}
+};
+
+// ── Data
+const norm = s => (s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[đĐ]/g,"d").toLowerCase();
+const slug = s => norm(s).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const P = window.PLACES.map((a,i)=>({i,vi:a[0],en:a[1],prov:a[2],reg:a[3],th:a[4],lat:a[5],lon:a[6],z:a[7],id:slug(a[1])}));
+const curated = Object.fromEntries(P.map(p=>[p.id,p]));
+const provReg = Object.fromEntries(P.map(p=>[p.prov,p.reg])); provReg["Bắc Ninh"]="N"; provReg["Hưng Yên"]="N";
+
+const store = {
+  get(k,d){try{const v=localStorage.getItem("vnfa:"+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem("vnfa:"+k,JSON.stringify(v))}catch(e){}}
+};
+let lang = store.get("lang","vi");
+let favs = new Set(store.get("favs",[]));
+let filt = store.get("filt",{reg:"all",th:"all"});
+if(!["all","mtn","rice","sea","water","city","heritage"].includes(filt.th)) filt.th = "all";   // older theme names
+let recent = store.get("recent",[]);
+let seen = store.get("seen",[]);
+let custom = store.get("custom",{});   // places found through search, kept so favorites still work
+const hist = []; let hpos = -1; let cur = null; let level = 1;
+
+const $ = id => document.getElementById(id);
+const stage = $("stage");
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// A place found through search: same shape as a curated place.
+function mkCustom(o){
+  const z = Math.round(o.z*2)/2;
+  const id = `at-${o.lat.toFixed(4)}-${o.lon.toFixed(4)}-${z}`;
+  const prov = o.prov||"";
+  const reg = provReg[prov] || (o.lat>=19.0 ? "N" : o.lat>=11.2 ? "C" : "S");
+  return {id, vi:o.vi||"", en:o.en||o.vi||"", prov, reg, th:"custom", lat:o.lat, lon:o.lon, z, custom:true};
+}
+function placeById(id){
+  if(curated[id]) return curated[id];
+  if(custom[id]) return mkCustom(custom[id]);
+  const m = /^at-(\d+\.\d+)-(\d+\.\d+)-(\d+(?:\.\d+)?)$/.exec(id||"");
+  return m ? mkCustom({lat:+m[1], lon:+m[2], z:+m[3]}) : null;
+}
+function remember(p){
+  if(!p.custom) return;
+  custom[p.id] = {vi:p.vi,en:p.en,prov:p.prov,lat:p.lat,lon:p.lon,z:p.z};
+  const ids = Object.keys(custom);
+  for(const id of ids.slice(0, Math.max(0, ids.length-100))) if(!favs.has(id)) delete custom[id];
+  store.set("custom", custom);
+}
+
+// ── Screen size
+function screenCss(W,H){
+  if(!screen.width || !screen.height) return {W,H};
+  const a = Math.min(screen.width,screen.height), b = Math.max(screen.width,screen.height);
+  return H>=W ? {W:a,H:b} : {W:b,H:a};
+}
+function fitStage(){
+  const r = stage.getBoundingClientRect();
+  return {W:Math.round(r.width||innerWidth), H:Math.round(r.height||innerHeight)};
+}
+
+// ── Web Mercator
+const mx = lon => (lon+180)/360;
+const my = lat => { const s=Math.sin(lat*Math.PI/180); return .5 - Math.log((1+s)/(1-s))/(4*Math.PI); };
+
+// Zoom values in the place list are tuned for a ~1600px-wide frame; adapt to this screen and the zoom level.
+const zFor = (p,W,H,lv) => p.z + (lv-1) + Math.log2(Math.max(W, H*1.5)/1600);
+
+function geometry(p, W, H, zEff, scale, margin=0){
+  const tz = clamp(Math.ceil(zEff + Math.log2(scale) - 0.15), 3, MAXZ);
+  const ts = 256 * Math.pow(2, zEff - tz);
+  const cx = mx(p.lon)*256*Math.pow(2,zEff), cy = my(p.lat)*256*Math.pow(2,zEff);
+  const ox = cx - W/2, oy = cy - H/2;
+  const tiles = []; const n = Math.pow(2,tz);
+  // margin: extra imagery around the frame so dragging never reveals an empty edge
+  for(let ty=Math.floor((oy-margin)/ts); ty<=Math.floor((oy+H+margin)/ts); ty++){
+    if(ty<0||ty>=n) continue;
+    for(let tx=Math.floor((ox-margin)/ts); tx<=Math.floor((ox+W+margin)/ts); tx++){
+      const l = tx*ts-ox, t = ty*ts-oy;
+      tiles.push({x:((tx%n)+n)%n, y:ty, z:tz, l, t, inView: l<W && l+ts>0 && t<H && t+ts>0});
+    }
+  }
+  if(margin){ const c={x:W/2,y:H/2}; tiles.sort((a,b)=>(b.inView-a.inView) || (Math.hypot(a.l+ts/2-c.x,a.t+ts/2-c.y)-Math.hypot(b.l+ts/2-c.x,b.t+ts/2-c.y))); }
+  const mpp = 156543.03392*Math.cos(p.lat*Math.PI/180)/Math.pow(2,zEff);
+  return {tiles, ts, zEff, km: W*mpp/1000};
+}
+
+let renderToken = 0, lastGeo = null;
+let view = {lat:0, lon:0};   // centre of the frame; starts on the place, moves when you drag
+const ymx = y => Math.atan(Math.sinh(Math.PI*(1-2*y)))*180/Math.PI;
+const moved = () => cur && (Math.abs(view.lat-cur.lat) > 1e-6 || Math.abs(view.lon-cur.lon) > 1e-6);
+function render(p, lv, fromLv, fast){
+  const {W,H} = fitStage(); const tok = ++renderToken;
+  const g = geometry(view, W, H, zFor(p,W,H,lv), Math.min(devicePixelRatio||1, 2), Math.round(Math.min(W,H)*0.5)); lastGeo = {g, W, H};
+  if(tmReady()){ renderInto(stage, g, lv, fromLv, fast, tok, W, H, wbTile(tm.after), true); renderInto($("stageB"), g, lv, fromLv, fast, tok, W, H, wbTile(tm.before), false); }
+  else renderInto(stage, g, lv, fromLv, fast, tok, W, H, TILE, true);
+  return g;
+}
+function renderInto(box, g, lv, fromLv, fast, tok, W, H, tileFn, main){
+  // Zoom: push the current picture toward the centre while the sharper one loads.
+  if(fromLv && !reduceMotion){
+    for(const old of box.children){
+      const k = Math.pow(2, lv - (+old.dataset.level||lv));
+      old.style.transformOrigin = `${W/2}px ${H/2}px`;
+      old.style.transition = "transform .9s cubic-bezier(.2,.7,.2,1), opacity 1.1s ease";
+      old.style.transform = `scale(${k})`;
+    }
+  }
+  const layer = document.createElement("div"); layer.className = "layer"; layer.dataset.level = lv;
+  if(fast) layer.style.transition = "opacity .3s ease";
+  const need = Math.max(1, g.tiles.filter(t=>t.inView).length*0.85);
+  let done = 0, shown = false;
+  const loader = $("loader");
+  const loaderTimer = main ? setTimeout(()=>{ if(!shown && tok===renderToken) loader.classList.add("on"); }, 600) : 0;
+  const reveal = () => {
+    if(shown || tok!==renderToken) return; shown = true;
+    if(main){ clearTimeout(loaderTimer); loader.classList.remove("on"); }
+    requestAnimationFrame(()=>layer.classList.add("on"));
+    [...box.children].forEach(c=>{ if(c!==layer) setTimeout(()=>c.remove(), fast ? 400 : 1200); });
+  };
+  for(const t of g.tiles){
+    const img = new Image();
+    img.crossOrigin = "anonymous"; img.decoding = "async"; img.alt = ""; img.draggable = false;
+    img.style.cssText = `left:${Math.round(t.l)}px;top:${Math.round(t.t)}px;width:${Math.ceil(g.ts)+1}px;height:${Math.ceil(g.ts)+1}px`;
+    const fin = () => { if(t.inView && ++done >= need) reveal(); };
+    img.onload = fin;
+    img.onerror = () => { if(img.crossOrigin){ img.removeAttribute("crossorigin"); img.src = tileFn(t.z,t.y,t.x)+"?nc"; } else { img.style.visibility="hidden"; fin(); } };
+    img.src = tileFn(t.z,t.y,t.x);
+    layer.appendChild(img);
+  }
+  box.appendChild(layer);
+  setTimeout(reveal, 3500);
+}
+
+// ── Time machine: Esri World Imagery Wayback (every published version since Feb 2014)
+const WB_CONFIG = "https://s3-us-west-2.amazonaws.com/config.maptiles.arcgis.com/waybackconfig.json";
+const WB_BASE = "https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer";
+let wbItems = null, wbByNum = new Map();
+const tm = {on:false, mode:"swipe", pos:0.5, fade:0.5, before:null, after:null, list:[], seq:0, capCache:new Map()};
+const tmReady = () => tm.on && tm.before && tm.after && tm.before !== tm.after;
+const wbTile = num => { const it = wbByNum.get(num); return (z,y,x) => it.url.replace("{level}",z).replace("{row}",y).replace("{col}",x); };
+async function wbLoadItems(){
+  if(wbItems) return wbItems;
+  const r = await fetch(WB_CONFIG); if(!r.ok) throw new Error("config");
+  const cfg = await r.json();
+  wbItems = Object.keys(cfg).filter(k=>!isNaN(+k)).map(k=>{
+    const it = cfg[k], m = /\d{4}-\d{2}-\d{2}/.exec((it && it.itemTitle) || "");
+    if(!m || !it.itemURL) return null;
+    const [y,mo,d] = m[0].split("-").map(Number);
+    return {num:+k, date:m[0], time:new Date(y,mo-1,d).getTime(), url:it.itemURL, meta:it.metadataLayerUrl||""};
+  }).filter(Boolean).sort((a,b)=>b.time-a.time);
+  wbByNum = new Map(wbItems.map(it=>[it.num,it]));
+  return wbItems;
+}
+// Walk back through the archive one real change at a time (same method as Esri's wayback-core).
+async function wbChanges(lat, lon, lvl, onProgress, seq){
+  const items = await wbLoadItems();
+  const n = Math.pow(2,lvl), col = Math.floor(mx(lon)*n), row = Math.floor(my(lat)*n);
+  const idx = new Map(items.map((it,i)=>[it.num,i]));
+  const found = []; let rel = items[0].num, guard = 0;
+  while(rel && guard++ < 120){
+    if(seq !== tm.seq) return null;
+    const r = await fetch(`${WB_BASE}/tilemap/${rel}/${lvl}/${row}/${col}`); const j = await r.json();
+    if(!j || !j.data || !j.data[0]) break;
+    const sel = j.select && j.select[0] ? +j.select[0] : rel;
+    found.push({num:sel, size:(j.size && j.size[0]) || 0}); onProgress(found.length);
+    const i = idx.get(sel); rel = i!==undefined && items[i+1] ? items[i+1].num : null;
+  }
+  // Neighbouring versions with identical tile size are the same photo: keep the oldest of each run.
+  const uniq = found.filter((f,i) => !(found[i+1] && f.size && found[i+1].size===f.size));
+  return uniq.map(f=>wbByNum.get(f.num)).filter(Boolean);
+}
+async function wbCapture(it, lat, lon, lvl){
+  const key = `${it.num}|${lat.toFixed(3)}|${lon.toFixed(3)}`;
+  if(tm.capCache.has(key)) return tm.capCache.get(key);
+  let out = null;
+  try{
+    if(it.meta){
+      const layerId = Math.min(23-10, 23-lvl);
+      const q = new URLSearchParams({f:"json", where:"1=1", outFields:"SRC_DATE2", returnGeometry:"false",
+        geometry:JSON.stringify({spatialReference:{wkid:4326}, x:lon, y:lat}), geometryType:"esriGeometryPoint", spatialRel:"esriSpatialRelIntersects"});
+      const r = await fetch(`${it.meta}/${layerId}/query?${q}`); const j = await r.json();
+      const v = j && j.features && j.features[0] && j.features[0].attributes && j.features[0].attributes.SRC_DATE2;
+      if(v) out = new Date(v);
+    }
+  }catch(e){}
+  tm.capCache.set(key, out); return out;
+}
+const fmtDay = time => new Date(time).toLocaleDateString(lang==="vi"?"vi-VN":"en-GB", {day:"numeric", month:"short", year:"numeric"});
+const fmtMonth = d => d.toLocaleDateString(lang==="vi"?"vi-VN":"en-GB", {month:"short", year:"numeric"});
+function tmLabel(num){ const it = wbByNum.get(num); if(!it) return ""; const c = tm.capCache.get(tm.capKey && tm.capKey(num)); return c ? fmtMonth(c) : fmtMonth(new Date(it.time)); }
+const tmLevel = () => clamp(Math.round(cur ? cur.z : 14) + 1, 11, 17);
+
+function tmSetMsg(text, err){ const m = $("tmMsg"); m.textContent = text || ""; m.className = "tmmsg" + (err ? " err" : ""); m.hidden = !text; }
+function tmApply(){
+  const B = $("stageB"), dv = $("divider"), ready = tmReady();
+  B.hidden = !ready; dv.hidden = !ready || tm.mode!=="swipe";
+  $("tmFadeRow").hidden = !ready || tm.mode!=="fade";
+  $("tmSwipe").setAttribute("aria-pressed", tm.mode==="swipe"); $("tmFade").setAttribute("aria-pressed", tm.mode==="fade");
+  if(!ready) return;
+  if(tm.mode==="swipe"){ B.style.opacity = 1; B.style.clipPath = `inset(0 ${((1-tm.pos)*100).toFixed(2)}% 0 0)`; dv.style.left = (tm.pos*100).toFixed(2)+"%"; }
+  else { B.style.clipPath = "none"; B.style.opacity = (1-tm.fade).toFixed(3); }
+  $("dtagL").textContent = $("tmFadeL").textContent = tmLabel(tm.before);
+  $("dtagR").textContent = $("tmFadeR").textContent = tmLabel(tm.after);
+  $("dknob").setAttribute("aria-label", T[lang].tmKnob);
+}
+async function tmCaptions(){
+  if(!tmReady() || !cur) return;
+  const lvl = tmLevel(), lat = view.lat, lon = view.lon, t = T[lang];
+  tm.capKey = num => `${num}|${lat.toFixed(3)}|${lon.toFixed(3)}`;
+  for(const [num, el] of [[tm.before,"tmBeforeCap"],[tm.after,"tmAfterCap"]]){
+    const it = wbByNum.get(num); if(!it) continue;
+    const c = await wbCapture(it, lat, lon, lvl);
+    if(num===tm.before || num===tm.after) $(el).textContent = c ? t.tmCap(fmtMonth(c)) : `${t.tmPub} ${fmtDay(it.time)}`;
+  }
+  tmApply();
+}
+function tmFillSelects(){
+  for(const [id, val] of [["tmBefore", tm.before], ["tmAfter", tm.after]]){
+    const sel = $(id); sel.innerHTML = "";
+    for(const it of tm.list){ const o = document.createElement("option"); o.value = it.num; o.textContent = fmtDay(it.time); o.selected = it.num===val; sel.appendChild(o); }
+  }
+  $("tmDates").hidden = tm.list.length < 2;
+}
+async function tmLoad(){
+  if(!tm.on || !cur) return;
+  const seq = ++tm.seq, t = T[lang];
+  tmSetMsg(t.tmLoading(0));
+  let list = null;
+  try{ list = await wbChanges(view.lat, view.lon, tmLevel(), n => { if(seq===tm.seq) tmSetMsg(t.tmLoading(n)); }, seq); }
+  catch(e){ if(seq===tm.seq){ tmSetMsg(t.tmErr, true); tm.list = []; tmFillSelects(); tm.before = tm.after = null; tmApply(); caption(cur, render(cur, level, 0, true)); } return; }
+  if(!list || seq!==tm.seq) return;
+  tm.list = list;
+  if(list.length < 2){ tm.before = tm.after = null; tmFillSelects(); tmSetMsg(t.tmNone); tmApply(); caption(cur, render(cur, level, 0, true)); return; }
+  if(!list.some(i=>i.num===tm.after)) tm.after = list[0].num;
+  if(!list.some(i=>i.num===tm.before) || tm.before===tm.after) tm.before = list[list.length-1].num;
+  tmFillSelects(); tmSetMsg(tm.mode==="fade" ? t.tmFoundFade(list.length) : t.tmFound(list.length));
+  tmApply(); caption(cur, render(cur, level, 0, true)); tmCaptions();
+}
+function tmToggle(on){
+  tm.on = on === undefined ? !tm.on : on;
+  document.body.classList.toggle("tm", tm.on);
+  $("tmPanel").hidden = !tm.on; $("tmBtn").setAttribute("aria-pressed", tm.on);
+  if(!tm.on){ tm.seq++; tm.before = tm.after = null; $("stageB").innerHTML = ""; tmApply(); if(cur) caption(cur, render(cur, level, 0, true)); return; }
+  tm.list = []; $("tmDates").hidden = true; tmApply(); tmLoad();
+}
+$("tmBtn").onclick = () => tmToggle();
+$("tmClose").onclick = () => tmToggle(false);
+$("tmSwipe").onclick = () => { tm.mode = "swipe"; tmApply(); if(tm.list.length>1) tmSetMsg(T[lang].tmFound(tm.list.length)); };
+$("tmFade").onclick = () => { tm.mode = "fade"; tmApply(); if(tm.list.length>1) tmSetMsg(T[lang].tmFoundFade(tm.list.length)); };
+$("tmFadeRange").addEventListener("input", e => { tm.fade = e.target.value/100; tmApply(); });
+for(const [id, key] of [["tmBefore","before"],["tmAfter","after"]]){
+  $(id).addEventListener("change", e => {
+    tm[key] = +e.target.value;
+    if(tm.before===tm.after){ const other = tm.list.find(i=>i.num!==tm[key]); if(other){ if(key==="before") tm.after = other.num; else tm.before = other.num; tmFillSelects(); } }
+    tmApply(); caption(cur, render(cur, level, 0, true)); tmCaptions();
+  });
+}
+// Divider: drag with mouse or finger
+(() => {
+  const dv = $("divider"); let on = false;
+  const setX = x => { tm.pos = clamp(x/innerWidth, 0.02, 0.98); tmApply(); };
+  dv.addEventListener("mousedown", e => { e.preventDefault(); e.stopPropagation(); on = true; });
+  addEventListener("mousemove", e => { if(on) setX(e.clientX); });
+  addEventListener("mouseup", () => { on = false; });
+  dv.addEventListener("touchstart", e => { e.preventDefault(); e.stopPropagation(); on = true; }, {passive:false});
+  dv.addEventListener("touchmove", e => { e.preventDefault(); if(on && e.touches[0]) setX(e.touches[0].clientX); }, {passive:false});
+  dv.addEventListener("touchend", () => { on = false; });
+  dv.addEventListener("keydown", e => { if(e.key==="ArrowLeft"||e.key==="ArrowRight"){ e.preventDefault(); e.stopPropagation(); tm.pos = clamp(tm.pos + (e.key==="ArrowLeft"?-0.05:0.05), 0.02, 0.98); tmApply(); } });
+})();
+
+// ── Caption
+function dms(v, pair){
+  const h = v>=0?pair[0]:pair[1];
+  const t = Math.round(Math.abs(v)*3600), d = Math.floor(t/3600), m = Math.floor(t%3600/60), s = t%60;
+  return `${d}°${String(m).padStart(2,"0")}′${String(s).padStart(2,"0")}″${h}`;
+}
+function fmtKm(k){ const v = k<1 ? k.toFixed(2) : k<10 ? k.toFixed(1) : Math.round(k).toString(); return lang==="vi"?v.replace(".",","):v; }
+const nameOf = p => (lang==="vi" ? p.vi : p.en) || p.vi || p.en || `${p.lat.toFixed(4)}, ${p.lon.toFixed(4)}`;
+
+function caption(p, g){
+  const t = T[lang];
+  $("region").textContent = t.R[p.reg] || "";
+  $("province").textContent = p.prov;
+  $("dot").hidden = !p.prov || !t.R[p.reg];
+  $("name").textContent = nameOf(p);
+  const other = lang==="vi" ? p.en : p.vi;
+  $("alt").textContent = other && other!==nameOf(p) ? other : (p.custom ? t.found : "");
+  $("coord").innerHTML = `<b>${dms(view.lat,t.lat)}</b>&nbsp; <b>${dms(view.lon,t.lon)}</b>`;
+  $("favBtn").setAttribute("aria-pressed", favs.has(p.id));
+  $("mapsBtn").href = `https://www.google.com/maps/@${view.lat.toFixed(5)},${view.lon.toFixed(5)},${Math.max(3, Math.round(g.zEff))}z/data=!3m1!1e3`;
+  const list = pool(), idx = list.indexOf(p);
+  $("count").textContent = idx>=0 ? `${String(idx+1).padStart(3,"0")} / ${list.length}` : "";
+  $("insetLabel").textContent = `${view.lat.toFixed(2)}, ${view.lon.toFixed(2)}`;
+  document.title = `${nameOf(p)} · Vicarus`;
+  for(let L=1; L<=LEVELS; L++){
+    const b = $("z"+L);
+    b.setAttribute("aria-pressed", L===level);
+    b.setAttribute("aria-label", t.zoom(L+"×"));
+    b.title = t.zoom(L);
+  }
+  const zc = $("zc"); zc.hidden = !moved(); zc.title = t.recenter; zc.setAttribute("aria-label", t.recenter);
+  drawInset(view);
+}
+
+function show(p, push=true){
+  cur = p; level = 1; view = {lat:p.lat, lon:p.lon};
+  if(push){ hist.splice(hpos+1); hist.push(p); hpos = hist.length-1; }
+  remember(p);
+  if(!p.custom){ recent = [p.id, ...recent.filter(x=>x!==p.id)].slice(0, Math.min(40, Math.floor(P.length/2))); store.set("recent", recent); }
+  seen = [p.id, ...seen.filter(x=>x!==p.id)].slice(0,300); store.set("seen", seen);
+  try{ history.replaceState(null,"","#"+p.id); }catch(e){}
+  caption(p, render(p, level));
+  if(tm.on) tmLoad();
+}
+function setLevel(n){
+  n = clamp(n, 1, LEVELS); if(!cur || n===level) return;
+  const from = level; level = n;
+  caption(cur, render(cur, level, from));
+}
+const cycleZoom = () => setLevel(level===LEVELS ? 1 : level+1);
+function recenter(){ if(!cur || !moved()) return; view = {lat:cur.lat, lon:cur.lon}; caption(cur, render(cur, level, 0, true)); if(tm.on) tmCaptions(); }
+// Move the view by a drag of (dx, dy) screen pixels at the current zoom; stays within reach of Vietnam.
+function panBy(dx, dy){
+  if(!cur || !lastGeo) return;
+  const world = 256*Math.pow(2, lastGeo.g.zEff);
+  const x = mx(view.lon)*world - dx, y = my(view.lat)*world - dy;
+  view = {lat: clamp(ymx(y/world), 6.5, 24.5), lon: clamp(x/world*360-180, 101.0, 118.5)};
+  caption(cur, render(cur, level, 0, true));
+}
+
+function pool(){ return P.filter(p => (filt.reg==="all"||p.reg===filt.reg) && (filt.th==="all"||p.th===filt.th)); }
+function randomPlace(){
+  let list = pool(); if(!list.length) list = P;
+  if(!navigator.onLine){ const s = list.filter(p=>seen.includes(p.id)), s2 = P.filter(p=>seen.includes(p.id)); list = s.length>1 ? s : (s2.length ? s2 : list); }
+  const fresh = list.filter(p=>!recent.includes(p.id) && p!==cur);
+  const from = fresh.length ? fresh : list.filter(p=>p!==cur);
+  const L = from.length ? from : list;
+  return L[Math.floor(Math.random()*L.length)];
+}
+function next(){ if(hpos < hist.length-1){ hpos++; show(hist[hpos], false); } else show(randomPlace()); }
+function prev(){ if(hpos > 0){ hpos--; show(hist[hpos], false); } }
+
+// ── Dot-map inset
+const B = {w:102.0,e:115.0,s:7.6,n:23.5};
+function drawMap(c, x0, y0, w, h, p){
+  const pad = 6, W = w-pad*2, H = h-pad*2-12;
+  const X0=mx(B.w),X1=mx(B.e),Y0=my(B.n),Y1=my(B.s);
+  const k = Math.min(W/(X1-X0), H/(Y1-Y0));
+  const px = q => [x0+pad+(mx(q.lon)-X0)*k, y0+pad+(my(q.lat)-Y0)*k];
+  c.fillStyle = "rgba(127,200,169,.55)";
+  for(const q of P){ const [x,y]=px(q); c.beginPath(); c.arc(x,y,1.3,0,7); c.fill(); }
+  const [x,y]=px(p);
+  c.strokeStyle="rgba(233,166,180,.9)"; c.lineWidth=1.2; c.beginPath(); c.arc(x,y,6,0,7); c.stroke();
+  c.fillStyle="#e9a6b4"; c.beginPath(); c.arc(x,y,2.6,0,7); c.fill();
+}
+function drawInset(p){
+  const cv = $("insetCv"), r = cv.getBoundingClientRect(); if(!r.width) return;
+  const d = Math.min(devicePixelRatio||1,2); cv.width = r.width*d; cv.height = r.height*d;
+  const c = cv.getContext("2d"); c.scale(d,d); drawMap(c, 0, 0, r.width, r.height, p);
+}
+
+// ── Toast, favorites
+let toastT;
+function toast(msg, action, label){
+  const el=$("toast"); el.textContent=msg; el.classList.toggle("act", !!action);
+  if(action){ const b=document.createElement("button"); b.textContent=label; b.onclick=()=>{ el.classList.remove("on","act"); action(); }; el.appendChild(b); }
+  el.classList.add("on"); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("on","act"), action?7000:2200);
+}
+function toggleFav(){
+  if(!cur) return;
+  if(favs.has(cur.id)){ favs.delete(cur.id); toast(T[lang].removed); } else { favs.add(cur.id); remember(cur); toast(T[lang].added); }
+  store.set("favs",[...favs]); $("favBtn").setAttribute("aria-pressed", favs.has(cur.id));
+}
+
+// ── Wallpapers in several sizes. Each size is laid out like the app at a matching screen width (vw), then scaled up.
+const SIZES = [
+  {id:"screen"},
+  {id:"phone",  w:1290, h:2796, vw:393,  r:"9:19.5"},
+  {id:"story",  w:1080, h:1920, vw:393,  r:"9:16"},
+  {id:"port",   w:1080, h:1350, vw:540,  r:"4:5"},
+  {id:"sq",     w:1080, h:1080, vw:540,  r:"1:1"},
+  {id:"tablet", w:2048, h:2732, vw:820,  r:"3:4"},
+  {id:"laptop", w:2880, h:1800, vw:1440, r:"16:10"},
+  {id:"desk",   w:3840, h:2160, vw:1440, r:"16:9"},
+];
+function sizeOf(sz){
+  if(sz.id!=="screen") return {pxW:sz.w, pxH:sz.h, vW:sz.vw, vH:sz.vw*sz.h/sz.w, scale:sz.w/sz.vw};
+  const s = screenCss(lastGeo.W, lastGeo.H), scale = clamp(devicePixelRatio||1, 1, 3);
+  return {pxW:Math.round(s.W*scale), pxH:Math.round(s.H*scale), vW:s.W, vH:s.H, scale, screen:true};
+}
+function renderSizes(){
+  const t = T[lang], box = $("sizes"); box.innerHTML = "";
+  for(const sz of SIZES){
+    const d = lastGeo ? sizeOf(sz) : {pxW:0,pxH:0};
+    const k = 34/Math.max(d.pxW||1, d.pxH||1);
+    const b = document.createElement("button"); b.className="size"; b.type="button"; b.dataset.id = sz.id;
+    b.innerHTML = `<span class="frame"><i style="width:${Math.max(8,Math.round(d.pxW*k))}px;height:${Math.max(8,Math.round(d.pxH*k))}px"></i></span><span><strong></strong><small></small></span>`;
+    b.querySelector("strong").textContent = t.SZ[sz.id];
+    b.querySelector("small").textContent = `${d.pxW} × ${d.pxH}${sz.r ? " · "+sz.r : ""}`;
+    b.onclick = () => saveSize(sz, b);
+    box.appendChild(b);
+  }
+  $("withText").checked = store.get("withText", true);
+}
+$("withText").addEventListener("change", e => store.set("withText", e.target.checked));
+
+async function makeImage(sz, withText){
+  const d = sizeOf(sz);
+  const zEff = d.screen ? lastGeo.g.zEff : zFor(cur, d.vW, d.vH, level);
+  const g = geometry(view, d.vW, d.vH, zEff, d.scale);
+  const cv = document.createElement("canvas"); cv.width = d.pxW; cv.height = d.pxH;
+  const c = cv.getContext("2d"); c.scale(d.scale, d.scale); c.fillStyle="#0b1412"; c.fillRect(0,0,d.vW,d.vH);
+  const draw = async tileFn => {
+    const load = t => new Promise(res=>{ const i=new Image(); i.crossOrigin="anonymous"; i.onload=()=>res(i); i.onerror=()=>res(null); i.src=tileFn(t.z,t.y,t.x); });
+    const imgs = await Promise.all(g.tiles.map(load));
+    imgs.forEach((im,k)=>{ if(im){ const t=g.tiles[k]; c.drawImage(im, t.l, t.t, g.ts+0.5, g.ts+0.5); }});
+  };
+  if(tmReady()){
+    await draw(wbTile(tm.after));
+    c.save();
+    if(tm.mode==="swipe"){ c.beginPath(); c.rect(0, 0, d.vW*tm.pos, d.vH); c.clip(); } else c.globalAlpha = 1-tm.fade;
+    await draw(wbTile(tm.before));
+    c.restore();
+    drawCompareMarks(c, d.vW, d.vH);
+  } else await draw(TILE);
+  if(withText){ if(d.screen) await drawOverlay(c, {W:d.vW, H:d.vH}, d.scale); else await drawOverlayAt(c, d.vW, d.vH, d.scale); }
+  let blob = null;
+  try{ blob = await new Promise(r=>cv.toBlob(r, "image/jpeg", 0.92)); }catch(e){}
+  return blob ? {blob, w:d.pxW, h:d.pxH} : null;
+}
+// Divider line and the two dates, drawn onto a saved comparison
+function drawCompareMarks(c, W, H){
+  const L = tmLabel(tm.before), R = tmLabel(tm.after);
+  c.save();
+  const fs = Math.max(11, Math.round(Math.min(W,H)/34));
+  c.font = `600 ${fs}px "JetBrains Mono", ui-monospace, monospace`;
+  const pill = (text, x, y, alignRight) => {
+    const w = c.measureText(text).width + fs*1.2, h = fs + fs*0.9, x0 = alignRight ? x - w : x;
+    c.fillStyle = "#f2f4ef"; c.beginPath(); if(c.roundRect) c.roundRect(x0, y, w, h, h/2); else c.rect(x0, y, w, h); c.fill();
+    c.fillStyle = "#0b1412"; c.textBaseline = "middle"; c.fillText(text, x0+fs*0.6, y+h/2+1);
+  };
+  const ty = Math.round(H*0.18);
+  if(tm.mode==="swipe"){
+    const x = W*tm.pos;
+    c.fillStyle = "#f2f4ef"; c.shadowColor = "rgba(0,0,0,.5)"; c.shadowBlur = 8; c.fillRect(x-1, 0, 2, H); c.shadowBlur = 0;
+    pill(L, x-8, ty, true); pill(R, x+8, ty, false);
+  } else {
+    pill(`${L} → ${R}`, 16, ty, false);
+  }
+  c.restore();
+}
+let saving = false;
+// Phones and tablets save through the share sheet (that is how an image reaches Photos); computers download the file.
+const mobileShare = () => /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+async function saveSize(sz, btn){
+  if(!cur || !lastGeo || saving) return;
+  const t = T[lang], msg = $("saveMsg"), go = $("saveGo"), d = sizeOf(sz);
+  saving = true; go.hidden = true; msg.className = "msg"; msg.textContent = t.making(d.pxW, d.pxH); btn.setAttribute("aria-busy","true");
+  let out = null;
+  try{ out = await makeImage(sz, $("withText").checked); }catch(e){}
+  saving = false; btn.removeAttribute("aria-busy");
+  if(!out){ msg.className = "msg err"; msg.textContent = t.dlFail; return; }
+  const span = tmReady() ? `-${wbByNum.get(tm.before).date.slice(0,4)}-vs-${wbByNum.get(tm.after).date.slice(0,4)}` : "";
+  const fname = `vicarus-${slug(nameOf(cur))||"view"}${span}-${out.w}x${out.h}.jpg`;
+  const file = new File([out.blob], fname, {type:"image/jpeg"});
+  if(mobileShare() && navigator.canShare && navigator.canShare({files:[file]})){
+    const share = async () => {
+      try{ await navigator.share({files:[file], title:nameOf(cur)}); go.hidden = true; msg.textContent = t.readyFor(out.w, out.h); }
+      catch(e){ if(e && e.name==="NotAllowedError"){ msg.textContent = t.readyFor(out.w, out.h); go.textContent = t.saveBtn; go.onclick = share; go.hidden = false; } }
+    };
+    await share(); return;
+  }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(out.blob); a.download=fname;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  msg.textContent = t.savedFor(out.w, out.h);
+}
+
+// Copy the on-screen caption and dot-map onto the wallpaper, glyph by glyph at their exact screen positions.
+const graphemes = str => (window.Intl && Intl.Segmenter)
+  ? [...new Intl.Segmenter("vi",{granularity:"grapheme"}).segment(str)].map(x=>({g:x.segment, i:x.index}))
+  : (()=>{ const out=[]; let i=0; for(const ch of str){ out.push({g:ch,i}); i+=ch.length; } return out; })();
+function drawText(c, el, dx, dy, scale){
+  if(!el || !el.textContent.trim() || !el.getClientRects().length) return;
+  const doc = el.ownerDocument, win = doc.defaultView;
+  const range = doc.createRange();
+  const walk = doc.createTreeWalker(el, 4 /* text */); let node;
+  while((node = walk.nextNode())){
+    const cs = win.getComputedStyle(node.parentElement);
+    c.save();
+    c.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    c.fillStyle = cs.color; c.textAlign = "left"; c.textBaseline = "alphabetic";
+    if(cs.textShadow && cs.textShadow!=="none"){ c.shadowColor="rgba(0,0,0,.45)"; c.shadowBlur=24*scale; c.shadowOffsetY=2*scale; }
+    const m = c.measureText("Hg");
+    const asc = m.fontBoundingBoxAscent ?? m.actualBoundingBoxAscent, desc = m.fontBoundingBoxDescent ?? m.actualBoundingBoxDescent;
+    const upper = cs.textTransform==="uppercase";
+    for(const {g,i} of graphemes(node.data)){
+      if(!g.trim()) continue;
+      range.setStart(node, i); range.setEnd(node, i+g.length);
+      const r = range.getBoundingClientRect(); if(!r.width) continue;
+      const base = r.top + (r.height-(asc+desc))/2 + asc;
+      c.fillText(upper ? g.toLocaleUpperCase("vi") : g, r.left+dx, base+dy);
+    }
+    c.restore();
+  }
+}
+async function drawOverlay(c, s, scale){
+  try{ await document.fonts.ready; }catch(e){}
+  const vw = document.documentElement.clientWidth, vh = document.documentElement.clientHeight;
+  const dxR = s.W - vw, dyB = s.H - vh;          // keep bottom/right-anchored parts anchored on the full screen
+  paintScrim(c, s.W, s.H, $("scrim").getBoundingClientRect().height);
+  const ir = $("insetCv").getBoundingClientRect();
+  if(ir.width) drawMap(c, ir.left+dxR, ir.top+dyB, ir.width, ir.height, view);
+  for(const id of ["region","dot","province","name","alt","coord"]) drawText(c, $(id), 0, dyB, scale);
+}
+function paintScrim(c, W, H, h){
+  const gr = c.createLinearGradient(0, H, 0, H-h);
+  gr.addColorStop(0,"rgba(5,10,9,.82)"); gr.addColorStop(.45,"rgba(5,10,9,.35)"); gr.addColorStop(1,"rgba(5,10,9,0)");
+  c.fillStyle = gr; c.fillRect(0, H-h, W, h);
+}
+// Other sizes: lay the caption out in a hidden frame of that width so the app's own styles decide wrapping and placement.
+async function drawOverlayAt(c, vW, vH, scale){
+  const f = document.createElement("iframe");
+  f.setAttribute("aria-hidden","true"); f.tabIndex = -1;
+  f.style.cssText = `position:fixed;left:-30000px;top:0;width:${Math.round(vW)}px;height:${Math.round(vH)}px;border:0;visibility:hidden;pointer-events:none`;
+  const css = [...document.querySelectorAll("style")].map(x=>x.textContent).join("\n");
+  const fonts = [...document.querySelectorAll('link[rel="stylesheet"]')].map(x=>x.outerHTML).join("");
+  f.srcdoc = `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${fonts}<style>${css}</style></head>`+
+    `<body><div id="scrim"></div><section id="caption">${$("caption").innerHTML}</section>`+
+    `<div id="dock"><div id="inset"><canvas id="insetCv"></canvas><div id="insetLabel"></div></div></div></body></html>`;
+  const loaded = new Promise(r => f.onload = r);
+  document.body.appendChild(f);
+  try{
+    await loaded;
+    const d = f.contentDocument;
+    d.getElementById("insetLabel").textContent = $("insetLabel").textContent;
+    try{ await d.fonts.ready; }catch(e){}
+    await new Promise(r => setTimeout(r, 30));
+    paintScrim(c, vW, vH, d.getElementById("scrim").getBoundingClientRect().height);
+    const ir = d.getElementById("insetCv").getBoundingClientRect();
+    if(ir.width) drawMap(c, ir.left, ir.top, ir.width, ir.height, view);
+    for(const id of ["region","dot","province","name","alt","coord"]) drawText(c, d.getElementById(id), 0, 0, scale);
+  } finally { f.remove(); }
+}
+
+// ── Gallery
+let galTab = "fav", galTheme = "all";
+function thumb(p){
+  const z = clamp(Math.round(p.z)-1, 3, MAXZ), n = Math.pow(2,z);
+  return TILE(z, Math.floor(my(p.lat)*n), Math.floor(mx(p.lon)*n));
+}
+function renderGallery(){
+  const t=T[lang];
+  $("tabFav").textContent = `${t.favs} (${favs.size})`; $("tabAll").textContent = `${t.all} (${P.length})`;
+  $("tabFav").setAttribute("aria-pressed", galTab==="fav"); $("tabAll").setAttribute("aria-pressed", galTab==="all");
+  // Places in this tab, north to south
+  const base = (galTab==="fav" ? [...favs].map(placeById).filter(Boolean) : P.slice()).sort((a,b)=>b.lat-a.lat);
+  // Category chips with counts for this tab
+  const cats = $("galCats"); cats.innerHTML = "";
+  const opts = [["all", t.any], ...Object.entries(t.THS)];
+  if(!opts.some(([v])=>v===galTheme) || (galTheme!=="all" && !base.some(p=>p.th===galTheme))) galTheme = "all";
+  for(const [v,label] of opts){
+    const n = v==="all" ? base.length : base.filter(p=>p.th===v).length;
+    if(v!=="all" && !n) continue;
+    const c = document.createElement("button"); c.className = "chip"; c.type = "button";
+    c.setAttribute("aria-pressed", galTheme===v); c.title = v==="all" ? t.any : t.TH[v];
+    c.innerHTML = `<span></span><small>${n}</small>`; c.querySelector("span").textContent = label;
+    c.onclick = () => { galTheme = v; renderGallery(); $("galGrid").scrollTop = 0; };
+    cats.appendChild(c);
+  }
+  const list = galTheme==="all" ? base : base.filter(p=>p.th===galTheme);
+  const grid = $("galGrid"); grid.innerHTML = "";
+  if(!list.length){ grid.innerHTML = `<p class="empty">${t.empty}</p>`; return; }
+  const frag = document.createDocumentFragment();
+  for(const p of list){
+    const b=document.createElement("button"); b.className="card"; b.type="button";
+    const img = document.createElement("img"); img.className="th"; img.loading="lazy"; img.decoding="async"; img.alt=""; img.src = thumb(p);
+    const st = document.createElement("strong"); st.textContent = nameOf(p);
+    const sm = document.createElement("small"); sm.textContent = p.prov;
+    b.append(img, st, sm);
+    b.onclick = () => { closePanels(); show(p); };
+    frag.appendChild(b);
+  }
+  grid.appendChild(frag);
+}
+
+// ── Theme chips
+function renderThemes(){
+  const t = T[lang], box = $("themes"); box.innerHTML = "";
+  const inReg = P.filter(p => filt.reg==="all" || p.reg===filt.reg);
+  for(const [v,label] of [["all",t.any], ...Object.entries(t.THS)]){
+    const n = v==="all" ? inReg.length : inReg.filter(p=>p.th===v).length;
+    const b = document.createElement("button"); b.className = "tchip"; b.type = "button";
+    b.setAttribute("aria-pressed", filt.th===v); b.title = v==="all" ? t.any : t.TH[v];
+    b.innerHTML = `<span></span><small>${n}</small>`; b.querySelector("span").textContent = label;
+    b.onclick = () => {
+      if(filt.th===v){ if(v!=="all") show(randomPlace()); return; }
+      filt.th = v; store.set("filt", filt); renderThemes();
+      if(v!=="all" || (cur && cur.custom)) show(randomPlace()); else if(cur && lastGeo) caption(cur, lastGeo.g);
+    };
+    box.appendChild(b);
+  }
+  const on = box.querySelector('[aria-pressed="true"]'); if(on && on.scrollIntoView) on.scrollIntoView({inline:"nearest", block:"nearest"});
+}
+
+// ── Options: language and filters
+function renderFilters(){
+  const t=T[lang];
+  const mk = (box, cur, opts, set) => {
+    box.innerHTML="";
+    for(const [v,label] of opts){
+      const b=document.createElement("button"); b.className="chip"; b.textContent=label;
+      b.setAttribute("aria-pressed", cur===v); b.onclick=()=>{ set(v); renderFilters(); };
+      box.appendChild(b);
+    }
+  };
+  mk($("langChips"), lang, [["vi","Tiếng Việt"],["en","English"]], v=>{ lang=v; store.set("lang",lang); applyLang(); });
+  mk($("regionChips"), filt.reg, [["all",t.any],...Object.entries(t.R)], v=>{ filt.reg=v; store.set("filt",filt); renderThemes(); });
+  $("filtNote").textContent = t.note(pool().length);
+  $("ver").textContent = `Vicarus · ${lang==="vi"?"phiên bản":"version"} ${APP_VERSION}`;
+}
+
+// ── Search: curated list first, then OpenStreetMap (Vietnam only); Google Maps links and coordinates are read directly.
+const inVN = (lat,lon) => lat>=8.0 && lat<=23.6 && lon>=102.0 && lon<=117.5;
+function cleanProv(a){
+  let s = a.state || a.province || a.city || a.region || "";
+  if(/^Thành phố Hồ Chí Minh$/i.test(s)) return "TP. Hồ Chí Minh";
+  return s.replace(/^(Tỉnh|Thành phố)\s+/i,"");
+}
+function fromOSM(r){
+  const nd = r.namedetails||{}, a = r.address||{};
+  const vi = nd["name:vi"] || nd.name || (r.display_name||"").split(",")[0];
+  const en = nd["name:en"] || nd.int_name || vi;
+  let lat = +r.lat, lon = +r.lon, z = 15.5;
+  const bb = (r.boundingbox||[]).map(Number);
+  if(bb.length===4){
+    const [s,n,w,e] = bb, dx = mx(e)-mx(w), dy = my(s)-my(n);
+    if(dx>0 && dy>0) z = Math.log2(Math.min(0.62*1600/(256*dx), 0.62*1000/(256*dy)));
+    z = clamp(z, 8, 16);
+    if(z < 12.5){ lat = (s+n)/2; lon = (w+e)/2; }   // large areas: frame the whole thing
+  }
+  const p = mkCustom({vi, en, prov:cleanProv(a), lat, lon, z});
+  p.where = (r.display_name||"").split(",").slice(1).map(x=>x.trim()).filter(x=>x && !/^Việt Nam$|^Vietnam$/i.test(x) && !/^\d{5,6}$/.test(x)).slice(0,3).join(", ");
+  return p;
+}
+function metersToZ(m, lat){ return Math.log2(156543.03*Math.cos(lat*Math.PI/180)/(m/900)); }
+function parseLink(q){
+  q = q.trim();
+  if(/maps\.app\.goo\.gl|goo\.gl\/maps/i.test(q)) return {short:true};
+  let lat=null, lon=null, z=null, name=null, m;
+  if((m = /\/maps\/place\/([^/@?]+)/.exec(q))) { try{ name = decodeURIComponent(m[1].replace(/\+/g," ")); }catch(e){} }
+  if((m = /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/.exec(q))) { lat=+m[1]; lon=+m[2]; }
+  if((m = /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?),(\d+(?:\.\d+)?)([zm])/.exec(q))) {
+    if(lat==null){ lat=+m[1]; lon=+m[2]; }
+    z = m[4]==="z" ? +m[3] : metersToZ(+m[3], lat);
+  }
+  if(lat==null && (m = /[?&](?:q|ll|query|center|destination)=(-?\d+(?:\.\d+)?)(?:,|%2C)\s*(-?\d+(?:\.\d+)?)/i.exec(q))) { lat=+m[1]; lon=+m[2]; }
+  if(lat==null && (m = /^(-?\d{1,2}(?:[.,]\d+)?)\s*[,;\s]\s*(-?\d{1,3}(?:[.,]\d+)?)$/.exec(q))) { lat=+m[1].replace(",","."); lon=+m[2].replace(",","."); }
+  if(lat==null || !isFinite(lat) || !isFinite(lon)) return null;
+  if(name && /^-?\d+(\.\d+)?,/.test(name)) name = null;
+  return {lat, lon, z: clamp(z ?? 15.5, 8, 16), name};
+}
+async function osm(path){
+  const r = await fetch(`${OSM}${path}&format=jsonv2&addressdetails=1&namedetails=1&accept-language=vi`);
+  if(!r.ok) throw new Error("http "+r.status);
+  return r.json();
+}
+function localMatches(q){
+  const toks = norm(q).split(/\s+/).filter(Boolean); if(!toks.length || norm(q).trim().length<2) return [];
+  return P.filter(p => { const h = norm(`${p.vi} ${p.en} ${p.prov}`); return toks.every(t=>h.includes(t)); }).slice(0,6);
+}
+function resItem(p, sub){
+  const b=document.createElement("button"); b.className="res"; b.type="button";
+  b.innerHTML = `<div class="th"></div><span><strong></strong><small></small></span>`;
+  b.querySelector(".th").style.backgroundImage = `url('${thumb(p)}')`;
+  b.querySelector("strong").textContent = nameOf(p);
+  b.querySelector("small").textContent = sub;
+  b.onclick = () => { closePanels(); show(p); };
+  return b;
+}
+let localBox, remoteBox;
+function renderLocal(q){
+  const box = $("results"); box.innerHTML = "";
+  localBox = document.createElement("div"); remoteBox = document.createElement("div");
+  box.append(localBox, remoteBox);
+  const L = localMatches(q);
+  if(L.length){
+    const h=document.createElement("h3"); h.textContent=T[lang].inList; localBox.appendChild(h);
+    L.forEach(p=>localBox.appendChild(resItem(p, `${T[lang].R[p.reg]} · ${p.prov}`)));
+  }
+}
+function remoteMsg(text, err){ remoteBox.innerHTML = ""; const m=document.createElement("p"); m.className="msg"+(err?" err":""); m.textContent=text; remoteBox.appendChild(m); }
+let searchSeq = 0;
+async function runSearch(q){
+  const t = T[lang]; q = q.trim(); if(!q) return;
+  renderLocal(q);
+  const link = parseLink(q);
+  if(link && link.short){ remoteMsg(t.shortLink, true); return; }
+  if(!navigator.onLine && !link){ remoteMsg(t.needNet, true); return; }
+  const seq = ++searchSeq; const go = $("qGo"); go.disabled = true;
+  try{
+    if(link){
+      if(!inVN(link.lat, link.lon)){ remoteMsg(t.outside, true); return; }
+      remoteMsg(t.searching);
+      let p = mkCustom({vi:link.name||"", en:link.name||"", prov:"", lat:link.lat, lon:link.lon, z:link.z});
+      try{
+        const r = await osm(`/reverse?lat=${link.lat}&lon=${link.lon}&zoom=14`);
+        if(r && r.address && r.address.country_code && r.address.country_code!=="vn"){ if(seq===searchSeq) remoteMsg(t.outside, true); return; }
+        if(r && r.address){
+          const o = fromOSM(r);
+          p = mkCustom({vi: link.name || o.vi, en: link.name || o.en, prov: o.prov, lat:link.lat, lon:link.lon, z:link.z});
+        }
+      }catch(e){ /* name lookup is optional; show the place anyway */ }
+      if(seq!==searchSeq) return;
+      closePanels(); show(p); return;
+    }
+    remoteMsg(t.searching);
+    const res = await osm(`/search?q=${encodeURIComponent(q)}&countrycodes=vn&limit=8`);
+    if(seq!==searchSeq) return;
+    remoteBox.innerHTML = "";
+    const items = (res||[]).map(fromOSM).filter(p=>inVN(p.lat,p.lon));
+    if(!items.length){ if(!localBox.childElementCount) remoteMsg(t.noResult); return; }
+    const h=document.createElement("h3"); h.textContent=t.onMap; remoteBox.appendChild(h);
+    items.forEach(p=>remoteBox.appendChild(resItem(p, p.where || p.prov)));
+  }catch(e){
+    if(seq===searchSeq) remoteMsg(t.netErr, true);
+  }finally{ if(seq===searchSeq) go.disabled = false; }
+}
+$("searchForm").addEventListener("submit", e => { e.preventDefault(); $("q").blur(); runSearch($("q").value); });
+$("q").addEventListener("input", e => { const v=e.target.value; if(!parseLink(v)) renderLocal(v); });
+
+// ── Panels
+const PANELS = ["galPanel","filtPanel","searchPanel","savePanel"];
+function openPanel(id){
+  closePanels(true); $(id).hidden=false;
+  if(id==="galPanel"){ if(!favs.size) galTab = "all"; renderGallery(); }
+  else if(id==="filtPanel") renderFilters();
+  else if(id==="savePanel"){ $("saveMsg").textContent=""; $("saveMsg").className="msg"; $("saveGo").hidden=true; renderSizes(); }
+  else { $("q").value=""; $("results").innerHTML=""; setTimeout(()=>$("q").focus(), 50); }
+}
+function closePanels(silent){
+  const wasFilt = !$("filtPanel").hidden;
+  PANELS.forEach(id=>$(id).hidden=true);
+  if(silent!==true && wasFilt && cur && !cur.custom){ const list=pool(); if(list.length && !list.includes(cur)) show(randomPlace()); else if(lastGeo) caption(cur, lastGeo.g); }
+}
+
+// ── Language
+function applyLang(){
+  if(tm.on && tm.list.length){ tmFillSelects(); setTimeout(tmCaptions, 0); }
+  const t=T[lang]; document.documentElement.lang = lang;
+  document.querySelectorAll("[data-t]").forEach(el=>{ el.textContent = t[el.dataset.t]; });
+  document.querySelectorAll("[data-tip]").forEach(el=>{ const s=t[el.dataset.tip]; el.title=s; el.setAttribute("aria-label",s); });
+  $("zoom").setAttribute("aria-label", t.zoom("").trim());
+  $("q").placeholder = t.searchPh;
+  $("loader").textContent = t.loading;
+  netBadge(); renderThemes();
+  if(cur && lastGeo) caption(cur, lastGeo.g);
+  if(!$("galPanel").hidden) renderGallery();
+}
+function netBadge(){ const o=$("offline"); o.textContent=T[lang].offline; o.hidden = navigator.onLine; }
+
+// ── Wiring
+$("nextBtn").onclick=next; $("nextEdge").onclick=next;
+$("prevBtn").onclick=prev; $("prevEdge").onclick=prev;
+$("favBtn").onclick=toggleFav; $("dlBtn").onclick=()=>openPanel("savePanel");
+$("searchBtn").onclick=()=>openPanel("searchPanel");
+$("galBtn").onclick=()=>openPanel("galPanel"); $("filtBtn").onclick=()=>openPanel("filtPanel");
+$("tabFav").onclick=()=>{galTab="fav";galTheme="all";renderGallery()}; $("tabAll").onclick=()=>{galTab="all";galTheme="all";renderGallery()};
+document.querySelectorAll("#zoom button[data-level]").forEach(b=>b.onclick=()=>setLevel(+b.dataset.level));
+$("zc").onclick = recenter;
+const toggleClean=()=>document.body.classList.toggle("clean");
+$("hideBtn").onclick=toggleClean; $("unhide").onclick=toggleClean;
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>closePanels());
+document.querySelectorAll(".panel").forEach(p=>p.addEventListener("click",e=>{ if(e.target===p) closePanels(); }));
+addEventListener("keydown",e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  const panelOpen = PANELS.some(id=>!$(id).hidden);
+  if(e.key==="Escape"){ if(panelOpen) closePanels(); else document.body.classList.remove("clean"); return; }
+  if(panelOpen) return;
+  const k=e.key.toLowerCase();
+  if(e.shiftKey && k.startsWith("arrow")){ e.preventDefault(); const st=Math.min(innerWidth,innerHeight)/3;
+    panBy(k==="arrowleft"?st:k==="arrowright"?-st:0, k==="arrowup"?st:k==="arrowdown"?-st:0); return; }
+  if(k==="arrowright"||k===" "||k==="n"){ e.preventDefault(); next(); }
+  else if(k==="arrowleft"||k==="p") prev();
+  else if(k==="f") toggleFav();
+  else if(k==="d") openPanel("savePanel");
+  else if(k==="g") openPanel("galPanel");
+  else if(k==="h") toggleClean();
+  else if(k==="/"){ e.preventDefault(); openPanel("searchPanel"); }
+  else if(k==="+"||k==="="||k==="arrowup") setLevel(level+1);
+  else if(k==="-"||k==="_"||k==="arrowdown") setLevel(level-1);
+  else if(k==="1"||k==="2"||k==="3") setLevel(+k);
+  else if(k==="c") recenter();
+  else if(k==="m") setHand(!handOn, true);
+  else if(k==="t") tmToggle();
+});
+let rT; addEventListener("resize",()=>{ clearTimeout(rT); rT=setTimeout(()=>{ if(cur) caption(cur, render(cur, level)); },250); });
+
+// ── Hand tool. On: press and drag (mouse or finger) moves the image. Off: swipe sideways changes place.
+// Pinch, double-tap/double-click or the mouse wheel change the zoom level in both modes.
+document.addEventListener("gesturestart", e=>e.preventDefault());
+stage.addEventListener("dragstart", e => e.preventDefault());
+let handOn = false;   // always starts off; tap ✋ to move the image
+function setHand(v, announce){
+  handOn = v;
+  $("handBtn").setAttribute("aria-pressed", v); stage.classList.toggle("hand", v);
+  if(announce) toast(v ? T[lang].handOn : T[lang].handOff);
+}
+let drag = null, pinch = null, lastTap = 0, wheelAt = 0;
+const layersMove = (dx, dy) => { for(const l of [...stage.children, ...$("stageB").children]){ l.style.transition = "none"; l.style.transform = `translate(${dx}px,${dy}px)`; } };
+function dragStart(x, y, touch){ drag = {x0:x, y0:y, dx:0, dy:0, on:false, t:Date.now(), touch}; }
+function dragMove(x, y){
+  if(!drag) return;
+  drag.dx = x-drag.x0; drag.dy = y-drag.y0;
+  if(!drag.on && Math.hypot(drag.dx, drag.dy) > 5){ drag.on = true; stage.classList.add("dragging"); }
+  if(drag.on && handOn) layersMove(drag.dx, drag.dy);
+}
+function dragEnd(){
+  if(!drag) return;
+  const d = drag; drag = null; stage.classList.remove("dragging");
+  if(d.on){
+    lastTap = 0;
+    if(handOn) panBy(d.dx, d.dy);
+    else if(Math.abs(d.dx) > 60 && Math.abs(d.dx) > Math.abs(d.dy)*1.3) (d.dx < 0 ? next : prev)();
+    return;
+  }
+  if(Date.now()-d.t < 300){ const now = Date.now(); if(now-lastTap < 330){ lastTap = 0; cycleZoom(); } else lastTap = now; }
+}
+function dragCancel(){ if(drag && drag.on) layersMove(0,0); drag = null; stage.classList.remove("dragging"); }
+// Mouse
+stage.addEventListener("mousedown", e => { if(e.button!==0) return; e.preventDefault(); dragStart(e.clientX, e.clientY, false); });
+addEventListener("mousemove", e => { if(drag && !drag.touch) dragMove(e.clientX, e.clientY); });
+addEventListener("mouseup", () => { if(drag && !drag.touch) dragEnd(); });
+addEventListener("blur", dragCancel);
+// Touch (iPhone, iPad, Android)
+const tdist = ts => Math.hypot(ts[0].clientX-ts[1].clientX, ts[0].clientY-ts[1].clientY);
+stage.addEventListener("touchstart", e => {
+  e.preventDefault();
+  if(e.touches.length===1){ pinch = null; dragStart(e.touches[0].clientX, e.touches[0].clientY, true); }
+  else if(e.touches.length===2){ dragCancel(); const d = tdist(e.touches); pinch = {d0:d, d}; }
+}, {passive:false});
+stage.addEventListener("touchmove", e => {
+  e.preventDefault();
+  if(pinch && e.touches.length>=2){ pinch.d = tdist(e.touches); return; }
+  if(drag && e.touches.length===1) dragMove(e.touches[0].clientX, e.touches[0].clientY);
+}, {passive:false});
+stage.addEventListener("touchend", e => {
+  if(pinch){ if(!e.touches.length){ const r = pinch.d/pinch.d0; pinch = null; if(r>1.2) setLevel(level+1); else if(r<0.83) setLevel(level-1); } return; }
+  if(drag && !e.touches.length) dragEnd();
+}, {passive:false});
+stage.addEventListener("touchcancel", () => { pinch = null; dragCancel(); });
+// Mouse wheel / trackpad: one zoom step per gesture
+stage.addEventListener("wheel", e => {
+  e.preventDefault(); const now = Date.now(); if(now-wheelAt < 450 || Math.abs(e.deltaY) < 4) return; wheelAt = now;
+  setLevel(level + (e.deltaY < 0 ? 1 : -1));
+}, {passive:false});
+$("handBtn").onclick = () => setHand(!handOn, true);
+setHand(handOn, false);
+
+let hiddenAt = 0;
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){ hiddenAt = Date.now(); return; }
+  if(hiddenAt && Date.now()-hiddenAt > 30*60*1000 && PANELS.every(id=>$(id).hidden)) show(randomPlace());
+});
+addEventListener("online", netBadge); addEventListener("offline", netBadge);
+if("serviceWorker" in navigator && window.isSecureContext){
+  addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}));
+  // When a new version takes over, reload once so it runs straight away.
+  const hadController = !!navigator.serviceWorker.controller; let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", ()=>{ if(hadController && !reloaded){ reloaded = true; location.reload(); } });
+}
+
+applyLang();
+const fromHash = placeById(decodeURIComponent(location.hash.slice(1)));
+show(fromHash || randomPlace());
+})();
+</script>
+</body>
+</html>
