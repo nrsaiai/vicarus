@@ -1,6 +1,6 @@
 // Vicarus: offline support.
 // App files are cached on install; satellite tiles and fonts are cached as you view them.
-const VERSION = "v7";
+const VERSION = "v8";
 const APP = `app-${VERSION}`, TILES = "tiles", FONTS = "fonts";
 const MAX_TILES = 1500;
 const APP_FILES = ["./", "index.html", "places.js", "manifest.webmanifest",
@@ -44,7 +44,8 @@ self.addEventListener("fetch", e => {
   }
   // App files: network first so updates arrive, cache when offline.
   if (url.origin === self.location.origin) {
-    e.respondWith(fetch(req).then(res => {
+    // Always check with the server (no-cache) so a new upload shows up immediately.
+  e.respondWith(fetch(req, {cache: "no-cache"}).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(APP).then(c => c.put(req, copy)); }
       return res;
     }).catch(async () => (await caches.match(req, {ignoreSearch: true})) ||
