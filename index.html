@@ -158,7 +158,11 @@ body.clean #unhide{display:grid}
 .grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-content:start;padding-bottom:8px;min-height:0}
 .card{border:0;padding:0;background:transparent;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0}
 .th{background:#1b2925 center/cover no-repeat}
-.card .th{aspect-ratio:4/3;border-radius:8px;max-width:100%}
+.card .th{aspect-ratio:4/3;border-radius:8px;max-width:100%;width:100%;display:block;object-fit:cover}
+.gcats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:-4px 0 14px;padding:2px 0;flex:none}
+.gcats::-webkit-scrollbar{display:none}
+.gcats .chip{flex:none;display:flex;gap:6px;align-items:baseline;white-space:nowrap}
+.gcats .chip small{font:400 10px/1 var(--mono);opacity:.7;font-variant-numeric:tabular-nums}
 .card:hover .th{outline:2px solid var(--lotus);outline-offset:2px}
 .card strong{font:500 13px/1.25 var(--body);overflow-wrap:anywhere}
 .card small{font:400 11px var(--mono);color:var(--muted)}
@@ -276,7 +280,7 @@ body.clean #unhide{display:grid}
   </div>
   <div id="inset"><canvas id="insetCv"></canvas><div id="insetLabel"></div></div>
 </div>
-<div id="attrib">Imagery © Esri, Maxar, Earthstar Geographics · v0.11</div>
+<div id="attrib">Imagery © Esri, Maxar, Earthstar Geographics · v0.12</div>
 
 <div class="panel" id="searchPanel" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
@@ -305,6 +309,7 @@ body.clean #unhide{display:grid}
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="galTitle">
     <header><h2 id="galTitle" data-t="gal"></h2><button class="ic" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
     <div class="tabs"><button class="chip" id="tabFav" aria-pressed="true"></button><button class="chip" id="tabAll" aria-pressed="false"></button></div>
+    <div class="gcats" id="galCats" role="toolbar"></div>
     <div class="grid" id="galGrid"></div>
   </div>
 </div>
@@ -327,7 +332,7 @@ body.clean #unhide{display:grid}
 "use strict";
 const TILE = (z,y,x) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${z}/${y}/${x}`;
 const OSM = "https://nominatim.openstreetmap.org";
-const APP_VERSION = "0.11";
+const APP_VERSION = "0.12";
 const MAXZ = 18;            // deepest imagery level requested; closer views are scaled up
 const LEVELS = 3;           // zoom steps toward the place: 1×, 2×, 4×
 
@@ -748,7 +753,7 @@ async function drawOverlayAt(c, vW, vH, scale){
 }
 
 // ── Gallery
-let galTab = "fav";
+let galTab = "fav", galTheme = "all";
 function thumb(p){
   const z = clamp(Math.round(p.z)-1, 3, MAXZ), n = Math.pow(2,z);
   return TILE(z, Math.floor(my(p.lat)*n), Math.floor(mx(p.lon)*n));
@@ -757,18 +762,35 @@ function renderGallery(){
   const t=T[lang];
   $("tabFav").textContent = `${t.favs} (${favs.size})`; $("tabAll").textContent = `${t.all} (${P.length})`;
   $("tabFav").setAttribute("aria-pressed", galTab==="fav"); $("tabAll").setAttribute("aria-pressed", galTab==="all");
-  const list = galTab==="fav" ? [...favs].map(placeById).filter(Boolean) : P;
+  // Places in this tab, north to south
+  const base = (galTab==="fav" ? [...favs].map(placeById).filter(Boolean) : P.slice()).sort((a,b)=>b.lat-a.lat);
+  // Category chips with counts for this tab
+  const cats = $("galCats"); cats.innerHTML = "";
+  const opts = [["all", t.any], ...Object.entries(t.THS)];
+  if(!opts.some(([v])=>v===galTheme) || (galTheme!=="all" && !base.some(p=>p.th===galTheme))) galTheme = "all";
+  for(const [v,label] of opts){
+    const n = v==="all" ? base.length : base.filter(p=>p.th===v).length;
+    if(v!=="all" && !n) continue;
+    const c = document.createElement("button"); c.className = "chip"; c.type = "button";
+    c.setAttribute("aria-pressed", galTheme===v); c.title = v==="all" ? t.any : t.TH[v];
+    c.innerHTML = `<span></span><small>${n}</small>`; c.querySelector("span").textContent = label;
+    c.onclick = () => { galTheme = v; renderGallery(); $("galGrid").scrollTop = 0; };
+    cats.appendChild(c);
+  }
+  const list = galTheme==="all" ? base : base.filter(p=>p.th===galTheme);
   const grid = $("galGrid"); grid.innerHTML = "";
   if(!list.length){ grid.innerHTML = `<p class="empty">${t.empty}</p>`; return; }
+  const frag = document.createDocumentFragment();
   for(const p of list){
-    const b=document.createElement("button"); b.className="card";
-    b.innerHTML = `<div class="th"></div><strong></strong><small></small>`;
-    b.querySelector(".th").style.backgroundImage = `url('${thumb(p)}')`;
-    b.querySelector("strong").textContent = nameOf(p);
-    b.querySelector("small").textContent = p.prov;
+    const b=document.createElement("button"); b.className="card"; b.type="button";
+    const img = document.createElement("img"); img.className="th"; img.loading="lazy"; img.decoding="async"; img.alt=""; img.src = thumb(p);
+    const st = document.createElement("strong"); st.textContent = nameOf(p);
+    const sm = document.createElement("small"); sm.textContent = p.prov;
+    b.append(img, st, sm);
     b.onclick = () => { closePanels(); show(p); };
-    grid.appendChild(b);
+    frag.appendChild(b);
   }
+  grid.appendChild(frag);
 }
 
 // ── Theme chips
@@ -920,7 +942,7 @@ $("q").addEventListener("input", e => { const v=e.target.value; if(!parseLink(v)
 const PANELS = ["galPanel","filtPanel","searchPanel","savePanel"];
 function openPanel(id){
   closePanels(true); $(id).hidden=false;
-  if(id==="galPanel") renderGallery();
+  if(id==="galPanel"){ if(!favs.size) galTab = "all"; renderGallery(); }
   else if(id==="filtPanel") renderFilters();
   else if(id==="savePanel"){ $("saveMsg").textContent=""; $("saveMsg").className="msg"; $("saveGo").hidden=true; renderSizes(); }
   else { $("q").value=""; $("results").innerHTML=""; setTimeout(()=>$("q").focus(), 50); }
@@ -951,7 +973,7 @@ $("prevBtn").onclick=prev; $("prevEdge").onclick=prev;
 $("favBtn").onclick=toggleFav; $("dlBtn").onclick=()=>openPanel("savePanel");
 $("searchBtn").onclick=()=>openPanel("searchPanel");
 $("galBtn").onclick=()=>openPanel("galPanel"); $("filtBtn").onclick=()=>openPanel("filtPanel");
-$("tabFav").onclick=()=>{galTab="fav";renderGallery()}; $("tabAll").onclick=()=>{galTab="all";renderGallery()};
+$("tabFav").onclick=()=>{galTab="fav";galTheme="all";renderGallery()}; $("tabAll").onclick=()=>{galTab="all";galTheme="all";renderGallery()};
 document.querySelectorAll("#zoom button[data-level]").forEach(b=>b.onclick=()=>setLevel(+b.dataset.level));
 $("zc").onclick = recenter;
 const toggleClean=()=>document.body.classList.toggle("clean");

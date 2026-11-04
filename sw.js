@@ -1,6 +1,6 @@
 // Vicarus: offline support.
 // App files are cached on install; satellite tiles and fonts are cached as you view them.
-const VERSION = "v0.11";
+const VERSION = "v0.12";
 const APP = `app-${VERSION}`, TILES = "tiles", FONTS = "fonts";
 const MAX_TILES = 1500;
 const APP_FILES = ["./", "index.html", "places.js", "manifest.webmanifest",

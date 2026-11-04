@@ -2,7 +2,7 @@
 
 *Việt Nam từ trên cao · Vietnam from above*
 
-A new satellite view of Vietnam every time you open it: 300 hand-picked places, from the Hà Giang passes to Cà Mau Cape, Hoàng Sa and Trường Sa.
+A new satellite view of Vietnam every time you open it: 500 hand-picked places, from the Hà Giang passes to Cà Mau Cape, Hoàng Sa and Trường Sa.
 
 **Install on iPhone:** open the site in Safari → Share → *Add to Home Screen*.
 
